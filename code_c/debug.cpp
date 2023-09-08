@@ -42,8 +42,8 @@ void AppInitDebugOutput()
 // +--------------------------------------------------------------+
 void AppDebugOutput(u8 flags, const char* filePath, u32 lineNumber, const char* funcName, DbgLevel_t level, bool newLine, const char* message)
 {
-	pd->system->logToConsole(message);
 	//TODO: Can we somehow log without doing a new-line?
+	pd->system->logToConsole(message);
 }
 void AppDebugPrint(u8 flags, const char* filePath, u32 lineNumber, const char* funcName, DbgLevel_t level, bool newLine, const char* formatString, ...)
 {

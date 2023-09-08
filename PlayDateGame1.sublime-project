@@ -190,6 +190,7 @@
 			"const char* GetDbgLevelStr(DbgLevel_t gyDbgLevel)",
 			"const char* GetMemArenaTypeStr(MemArenaType_t arenaType)",
 			"const char* GetPDSystemEventStr(PDSystemEvent event)",
+			"int MainUpdateCallback(void* userData)",
 			"int PrintVa_Measure(const char* formatString, va_list args)",
 			"u64 GetNumMarks(MemArena_t* arena)",
 			"u64 GrowMemQuery(MemArena_t* arena, const void* prevAllocPntr, u64 prevAllocSize, GrowMemToken_t* tokenOut = nullptr)",
@@ -199,9 +200,13 @@
 			"void AppDebugPrint(u8 flags, const char* filePath, u32 lineNumber, const char* funcName, DbgLevel_t level, bool newLine, const char* formatString, ...)",
 			"void AppInitDebugOutput()",
 			"void ClearMemArena(MemArena_t* arena)",
+			"void DebugConsoleToggledCallback(void* userData)",
 			"void DebugOutput(const char* filePath, u32 lineNumber, const char* funcName, DbgLevel_t level, bool newLine, const char* message)",
 			"void FreeMemArena(MemArena_t* arena)",
+			"void GameInitialize()",
+			"void GameUpdate()",
 			"void GrowMem(MemArena_t* arena, const void* prevAllocPntr, u64 prevAllocSize, u64 newAllocSize, const GrowMemToken_t* token)",
+			"void HandleSystemEvent(PDSystemEvent event, uint32_t arg)",
 			"void InitMemArena_Alias(MemArena_t* arena, MemArena_t* sourceArena)",
 			"void InitMemArena_Buffer(MemArena_t* arena, u64 bufferSize, void* bufferPntr, bool singleAlloc = false, AllocAlignment_t alignment = AllocAlignment_None)",
 			"void InitMemArena_FixedHeap(MemArena_t* arena, u64 size, void* memoryPntr, AllocAlignment_t alignment = AllocAlignment_None)",
@@ -218,6 +223,11 @@
 		],
 		"custom_globals":
 		[
+			"app",
+			"fixedHeap",
+			"game",
+			"mainHeap",
+			"pd",
 		],
 		"custom_types":
 		[
@@ -226,6 +236,7 @@
 			"AppState_t",
 			"DbgLevel_t",
 			"FreeFunction_f",
+			"GameState_t",
 			"GyLibDebugOutput_f",
 			"GyLibDebugPrint_f",
 			"HeapAllocPrefix_t",
@@ -233,6 +244,7 @@
 			"MarkedStackArenaHeader_t",
 			"MemArenaType_t",
 			"MemArena_t",
+			"PlaydateAPI",
 		],
 	},
 }

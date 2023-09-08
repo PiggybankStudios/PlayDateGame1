@@ -15,10 +15,17 @@ Date:   09\08\2023
 struct AppState_t
 {
 	bool initialized;
+	bool firstUpdateCalled;
 	
 	MemArena_t stdHeap;
 	MemArena_t fixedHeap;
 	MemArena_t mainHeap;
+	
+	PDMenuItem* debugConsoleMenuItem;
+	bool debugConsoleEnabled;
+	
+	GameState_t* gameStatePntr;
+
 };
 
 #endif //  _MAIN_H

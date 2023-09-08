@@ -11,11 +11,13 @@ Description:
 #include "gylib/gy_defines_check.h"
 
 #define GYLIB_LOOKUP_PRIMES_10
+#define GYLIB_USE_ASSERT_FAILURE_FUNC
 #include "gylib/gy.h"
 
 // +--------------------------------------------------------------+
 // |                         Header Files                         |
 // +--------------------------------------------------------------+
+#include "game.h"
 #include "main.h"
 
 // +--------------------------------------------------------------+
@@ -25,54 +27,34 @@ PlaydateAPI* pd = nullptr;
 AppState_t* app = nullptr;
 MemArena_t* fixedHeap = nullptr;
 MemArena_t* mainHeap = nullptr;
+GameState_t* game = nullptr;
+
+const v2i ScreenSize = { LCD_COLUMNS, LCD_ROWS };
 
 // +--------------------------------------------------------------+
 // |                         Source Files                         |
 // +--------------------------------------------------------------+
 #include "pd_api_helpers.cpp"
 #include "debug.cpp"
-
-// +--------------------------------------------------------------+
-// |                           Globals                            |
-// +--------------------------------------------------------------+
-const char* fontpath = "/System/Fonts/Asheville-Sans-14-Bold.pft";
-LCDFont* font = NULL;
-
-#define TEXT_WIDTH 112
-#define TEXT_HEIGHT 16
-#define DISPLAY_TEXT "Taylor Robbins!"
-
-int x = (400-TEXT_WIDTH)/2;
-int y = (240-TEXT_HEIGHT)/2;
-int dx = 1;
-int dy = 2;
-
-// +--------------------------------------------------------------+
-// |                           MainLoop                           |
-// +--------------------------------------------------------------+
-static int MainLoop(void* userdata)
-{
-	PlaydateAPI* pd = (PlaydateAPI*)userdata;
-	
-	pd->graphics->clear(kColorWhite);
-	pd->graphics->setFont(font);
-	pd->graphics->drawText(DISPLAY_TEXT, strlen(DISPLAY_TEXT), kASCIIEncoding, x, y);
-	
-	x += dx;
-	y += dy;
-	
-	if (x < 0 || x > LCD_COLUMNS - TEXT_WIDTH) { dx = -dx; }
-	if (y < 0 || y > LCD_ROWS - TEXT_HEIGHT) { dy = -dy; }
-	
-	pd->system->drawFPS(0,0);
-	
-	return 1;
-}
+#include "game.cpp"
 
 // +--------------------------------------------------------------+
 // |                        Event Handler                         |
 // +--------------------------------------------------------------+
-int eventHandler(PlaydateAPI* playdate, PDSystemEvent event, uint32_t arg)
+int MainUpdateCallback(void* userData)
+{
+	if (!app->firstUpdateCalled)
+	{
+		WriteLine_N("Running...");
+		app->firstUpdateCalled = true;
+	}
+	
+	GameUpdate();
+	
+	return 0;
+}
+
+void HandleSystemEvent(PDSystemEvent event, uint32_t arg)
 {
 	if (app != nullptr)
 	{
@@ -100,19 +82,23 @@ int eventHandler(PlaydateAPI* playdate, PDSystemEvent event, uint32_t arg)
 			InitMemArena_PagedHeapArena(&newApp->mainHeap, MAIN_HEAP_PAGE_SIZE, &newApp->stdHeap, MAIN_HEAP_MAX_NUM_PAGES);
 			fixedHeap = &newApp->fixedHeap;
 			mainHeap = &newApp->mainHeap;
+			newApp->initialized = true;
 			Assert(app == nullptr);
 			app = newApp;
+			
+			app->gameStatePntr = AllocStruct(fixedHeap, GameState_t);
+			NotNull(app->gameStatePntr);
+			game = app->gameStatePntr;
 			
 			AppInitDebugOutput();
 			WriteLine_O("+==============================+");
 			PrintLine_O("|       %s v%u.%u(%0u)       |", PROJECT_NAME, VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD);
 			WriteLine_O("+==============================+");
 			
-			const char* err;
-			font = pd->graphics->loadFont(fontpath, &err);
-			if (font == NULL) { pd->system->error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, fontpath, err); }
+			WriteLine_N("Initializing...");
+			GameInitialize();
 			
-			pd->system->setUpdateCallback(MainLoop, pd);
+			pd->system->setUpdateCallback(MainUpdateCallback, nullptr);
 		} break;
 		
 		// +==============================+
@@ -187,8 +173,6 @@ int eventHandler(PlaydateAPI* playdate, PDSystemEvent event, uint32_t arg)
 			//TODO: Implement me!
 		} break;
 	}
-	
-	return 0;
 }
 
 EXTERN_C_START
@@ -199,8 +183,32 @@ int eventHandlerShim(PlaydateAPI* playdate, PDSystemEvent event, uint32_t arg)
 {
 	if (event == kEventInit) { pdrealloc = playdate->system->realloc; }
 	pd = playdate;
-	int result = eventHandler(playdate, event, arg);
-	pd = nullptr;
-	return result;
+	HandleSystemEvent(event, arg);
+	return 0;
 }
 EXTERN_C_END
+
+// +--------------------------------------------------------------+
+// |                      Assertion Callback                      |
+// +--------------------------------------------------------------+
+void GyLibAssertFailure(const char* filePath, int lineNumber, const char* funcName, const char* expressionStr, const char* messageStr)
+{
+	if (pd == nullptr) { return; }
+	
+	if (app != nullptr && app->initialized)
+	{
+		//TODO: Shorten path to just fileName
+		if (messageStr != nullptr && messageStr[0] != '\0')
+		{
+			pd->system->error("Assertion Failure! %s (Expression: %s) in %s %s:%d", messageStr, expressionStr, funcName, filePath, lineNumber);
+		}
+		else
+		{
+			pd->system->error("Assertion Failure! (%s) is not true in %s %s:%d", expressionStr, funcName, filePath, lineNumber);
+		}
+	}
+	else
+	{
+		MyBreak();
+	}
+}
