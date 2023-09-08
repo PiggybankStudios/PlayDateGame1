@@ -41,6 +41,9 @@ void GameInitialize()
 		AssertMsg(false, "Couldn't load font!");
 	}
 	
+	game->pigTexture = LoadTexture(NewStr("Resources/Sprites/pig"));
+	Assert(game->pigTexture.isValid);
+	
 	app->fpsDisplayMenuItem = pd->system->addCheckmarkMenuItem("FPS", 1, FpsToggledCallback, nullptr);
 	NotNull(app->fpsDisplayMenuItem);
 	pd->system->setMenuItemValue(app->fpsDisplayMenuItem, app->fpsDisplayEnabled ? 1 : 0);
@@ -49,10 +52,10 @@ void GameInitialize()
 	NotNull(app->debugConsoleMenuItem);
 	pd->system->setMenuItemValue(app->debugConsoleMenuItem, app->debugConsoleEnabled ? 1 : 0);
 	
-	game->displayTextPos.x = (400 - TEXT_WIDTH) / 2;
-	game->displayTextPos.y = (240 - TEXT_HEIGHT) / 2;
-	game->displayTextVelocity.x = 1;
-	game->displayTextVelocity.y = 2;
+	game->pigPos.x = (400 - game->pigTexture.width) / 2;
+	game->pigPos.y = (240 - game->pigTexture.height) / 2;
+	game->pigVel.x = 1;
+	game->pigVel.y = 2;
 	
 	game->initialized = true;
 }
@@ -70,33 +73,33 @@ void GameUpdate()
 	if (BtnPressed(Btn_B))
 	{
 		HandleBtnExtended(Btn_B);
-		game->displayTextVelocity.x += SignOfI32(game->displayTextVelocity.x);
-		game->displayTextVelocity.y += SignOfI32(game->displayTextVelocity.y);
+		game->pigVel.x += SignOfI32(game->pigVel.x);
+		game->pigVel.y += SignOfI32(game->pigVel.y);
 	}
 	
 	if (!IsCrankDocked())
 	{
 		if (!game->followingCrank)
 		{
-			game->displayTextOldVelocity = game->displayTextVelocity;
+			game->pigOldVel = game->pigVel;
 			pd->system->setPeripheralsEnabled(kAccelerometer);
 			game->followingCrank = true;
 		}
-		// game->displayTextVelocity = Vec2Roundi(Vec2FromAngle(input->crankAngleRadians + ThreeHalfsPi32, 3));
-		game->displayTextVelocity.x += RoundR32i(input->accelVec.x);
-		game->displayTextVelocity.y += RoundR32i(input->accelVec.y);
+		// game->pigVel = Vec2Roundi(Vec2FromAngle(input->crankAngleRadians + ThreeHalfsPi32, 3));
+		game->pigVel.x += RoundR32i(input->accelVec.x);
+		game->pigVel.y += RoundR32i(input->accelVec.y);
 	}
 	else if (game->followingCrank)
 	{
-		game->displayTextVelocity = game->displayTextOldVelocity;
+		game->pigVel = game->pigOldVel;
 		pd->system->setPeripheralsEnabled(kNone);
 		game->followingCrank = false;
 	}
 	
-	game->displayTextPos += game->displayTextVelocity;
+	game->pigPos += game->pigVel;
 	
-	if (game->displayTextPos.x < 0 || game->displayTextPos.x > ScreenSize.width  - TEXT_WIDTH)  { game->displayTextVelocity.x = -game->displayTextVelocity.x; }
-	if (game->displayTextPos.y < 0 || game->displayTextPos.y > ScreenSize.height - TEXT_HEIGHT) { game->displayTextVelocity.y = -game->displayTextVelocity.y; }
+	if (game->pigPos.x < 0 || game->pigPos.x > ScreenSize.width  - game->pigTexture.width)  { game->pigVel.x = -game->pigVel.x; }
+	if (game->pigPos.y < 0 || game->pigPos.y > ScreenSize.height - game->pigTexture.height) { game->pigVel.y = -game->pigVel.y; }
 	
 	// +==============================+
 	// |            Render            |
@@ -105,7 +108,8 @@ void GameUpdate()
 	pd->graphics->setDrawMode(game->isInverted ? kDrawModeInverted : kDrawModeCopy);
 	
 	pd->graphics->setFont(game->font);
-	PdDrawText(NewStr(DISPLAY_TEXT), game->displayTextPos);
+	// PdDrawText(NewStr(DISPLAY_TEXT), game->pigPos);
+	pd->graphics->drawRotatedBitmap(game->pigTexture.bitmap, game->pigPos.x, game->pigPos.y, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f);
 	
 	if (app->fpsDisplayEnabled)
 	{

@@ -10,9 +10,9 @@ Date:   09\08\2023
 #define FONT_PATH "/System/Fonts/Asheville-Sans-14-Bold.pft"
 // const char* fontpath = "/System/Fonts/Bitmore.pft";
 
-#define TEXT_WIDTH 112
-#define TEXT_HEIGHT 16
-#define DISPLAY_TEXT "Taylor Robbins!"
+// #define TEXT_WIDTH 112
+// #define TEXT_HEIGHT 16
+// #define DISPLAY_TEXT "Taylor Robbins!"
 
 struct GameState_t
 {
@@ -20,11 +20,14 @@ struct GameState_t
 	
 	LCDFont* font;
 	
-	bool isInverted;
+	Texture_t pigTexture;
+	v2i pigPos;
+	v2i pigVel;
+	
 	bool followingCrank;
-	v2i displayTextOldVelocity;
-	v2i displayTextPos;
-	v2i displayTextVelocity;
+	v2i pigOldVel;
+	
+	bool isInverted;
 };
 
 #endif //  _GAME_H

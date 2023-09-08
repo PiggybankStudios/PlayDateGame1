@@ -190,6 +190,7 @@
 			"#define SoftReallocMem(arena, allocPntr, newSize)",
 			"#define UnpackAllocPrefixSize(packedSize)",
 			"MemArena_t AllocBufferArena(MemArena_t* sourceArena, u64 numBytes, AllocAlignment_t alignOverride = AllocAlignment_None)",
+			"Texture_t LoadTexture(MyStr_t path)",
 			"bool BtnChanged(Btn_t btn)",
 			"bool BtnChangedRaw(Btn_t btn)",
 			"bool BtnDown(Btn_t btn)",
@@ -288,6 +289,7 @@
 			"MemArenaType_t",
 			"MemArena_t",
 			"PlaydateAPI",
+			"Texture_t",
 		],
 	},
 }

@@ -9,6 +9,6 @@ Date:   09\06\2023
 
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 1
-#define VERSION_BUILD 295
+#define VERSION_BUILD 304
 
 #endif //  _VERSION_H

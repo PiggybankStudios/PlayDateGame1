@@ -17,6 +17,8 @@ Description:
 // +--------------------------------------------------------------+
 // |                         Header Files                         |
 // +--------------------------------------------------------------+
+#include "pd_api_ext.h"
+#include "texture.h"
 #include "input.h"
 #include "game.h"
 #include "main.h"
@@ -32,12 +34,13 @@ AppInput_t* input = nullptr;
 GameState_t* game = nullptr;
 
 const v2i ScreenSize = { LCD_COLUMNS, LCD_ROWS };
+const v2 ScreenSizef = { (r32)LCD_COLUMNS, (r32)LCD_ROWS };
 
 // +--------------------------------------------------------------+
 // |                         Source Files                         |
 // +--------------------------------------------------------------+
-#include "pd_api_helpers.cpp"
 #include "debug.cpp"
+#include "texture.cpp"
 #include "input.cpp"
 #include "game.cpp"
 
