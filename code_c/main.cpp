@@ -6,8 +6,6 @@ Description:
 	** Holds the main entry point for the application
 */
 
-#include "pd_api.h"
-
 #include "version.h"
 
 #include "gylib/gy_defines_check.h"
@@ -16,27 +14,23 @@ Description:
 #include "gylib/gy.h"
 
 // +--------------------------------------------------------------+
-// |                           setup.c                            |
+// |                         Header Files                         |
 // +--------------------------------------------------------------+
-static void* (*pdrealloc)(void* ptr, size_t size);
+#include "main.h"
 
-#if 0
+// +--------------------------------------------------------------+
+// |                           Globals                            |
+// +--------------------------------------------------------------+
+PlaydateAPI* pd = nullptr;
+AppState_t* app = nullptr;
+MemArena_t* fixedHeap = nullptr;
+MemArena_t* mainHeap = nullptr;
 
-#if TARGET_PLAYDATE
-
-void* _malloc_r(struct _reent* _REENT, size_t nbytes) { return pdrealloc(NULL,nbytes); }
-void* _realloc_r(struct _reent* _REENT, void* ptr, size_t nbytes) { return pdrealloc(ptr,nbytes); }
-void _free_r(struct _reent* _REENT, void* ptr ) { if ( ptr != NULL ) pdrealloc(ptr,0); }
-
-#else
-
-void* malloc(size_t nbytes) { return pdrealloc(NULL,nbytes); }
-void* realloc(void* ptr, size_t nbytes) { return pdrealloc(ptr,nbytes); }
-void  free(void* ptr ) { if ( ptr != NULL ) pdrealloc(ptr,0); }
-
-#endif
-
-#endif
+// +--------------------------------------------------------------+
+// |                         Source Files                         |
+// +--------------------------------------------------------------+
+#include "pd_api_helpers.cpp"
+#include "debug.cpp"
 
 // +--------------------------------------------------------------+
 // |                           Globals                            |
@@ -78,8 +72,13 @@ static int MainLoop(void* userdata)
 // +--------------------------------------------------------------+
 // |                        Event Handler                         |
 // +--------------------------------------------------------------+
-int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
+int eventHandler(PlaydateAPI* playdate, PDSystemEvent event, uint32_t arg)
 {
+	if (app != nullptr)
+	{
+		PrintLine_D("Event: %s %u", GetPDSystemEventStr(event));
+	}
+	
 	switch (event)
 	{
 		// +==============================+
@@ -87,6 +86,28 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 		// +==============================+
 		case kEventInit:
 		{
+			GyLibDebugOutputFunc = GyLibOutputHandler;
+			GyLibDebugPrintFunc = GyLibPrintHandler;
+			
+			AppState_t* newApp = (AppState_t*)MyMalloc(sizeof(AppState_t));
+			NotNull(newApp);
+			ClearPointer(newApp);
+			newApp->initialized = true;
+			InitMemArena_StdHeap(&newApp->stdHeap);
+			void* fixedHeapPntr = MyMalloc(FIXED_HEAP_SIZE);
+			NotNull(fixedHeapPntr);
+			InitMemArena_FixedHeap(&newApp->fixedHeap, FIXED_HEAP_SIZE, fixedHeapPntr);
+			InitMemArena_PagedHeapArena(&newApp->mainHeap, MAIN_HEAP_PAGE_SIZE, &newApp->stdHeap, MAIN_HEAP_MAX_NUM_PAGES);
+			fixedHeap = &newApp->fixedHeap;
+			mainHeap = &newApp->mainHeap;
+			Assert(app == nullptr);
+			app = newApp;
+			
+			AppInitDebugOutput();
+			WriteLine_O("+==============================+");
+			PrintLine_O("|       %s v%u.%u(%0u)       |", PROJECT_NAME, VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD);
+			WriteLine_O("+==============================+");
+			
 			const char* err;
 			font = pd->graphics->loadFont(fontpath, &err);
 			if (font == NULL) { pd->system->error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, fontpath, err); }
@@ -177,6 +198,9 @@ __declspec(dllexport)
 int eventHandlerShim(PlaydateAPI* playdate, PDSystemEvent event, uint32_t arg)
 {
 	if (event == kEventInit) { pdrealloc = playdate->system->realloc; }
-	return eventHandler(playdate, event, arg);
+	pd = playdate;
+	int result = eventHandler(playdate, event, arg);
+	pd = nullptr;
+	return result;
 }
 EXTERN_C_END

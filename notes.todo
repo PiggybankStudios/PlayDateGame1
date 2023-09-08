@@ -6,6 +6,15 @@
 	[ ] Download AArch32 bare-metal target (arm-non-eabi) "https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads"
 	[ ] Pulp "https://play.date/pulp/"
 
+# PlayDate Specs:
+	[ ] "https://help.play.date/hardware/the-specs/"
+	[ ] Display: 400x240 (2.7-inch diagonal)
+	[ ] Memory (RAM): 16 MB
+	[ ] Storage: 4 GB (Flash)
+	[ ] CPU: 168MHz Cortex M7
+	[ ] Total Size: 76mm x 74mm x 9mm
+	[ ] Cost: $199
+
 # Useful Defines from pd_api.h
 	[ ] LCD_COLUMNS     // 400
 	[ ] LCD_ROWS        // 240
