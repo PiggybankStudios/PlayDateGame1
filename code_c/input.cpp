@@ -23,7 +23,7 @@ void UpdateAppInputBtnState(Btn_t btn, bool isDown)
 		if (isDown) { state->wasPressed = true; }
 		else { state->wasReleased = true; }
 		state->numTransitions++;
-		PrintLine_D("Btn_%s %s", GetBtnStr(btn), isDown ? "Pressed" : "Released");
+		if (!IsPseudoBtn(btn)) { PrintLine_D("Btn_%s %s", GetBtnStr(btn), isDown ? "Pressed" : "Released"); }
 	}
 }
 
@@ -38,18 +38,29 @@ void UpdateAppInput()
 		state->numTransitions = 0;
 		state->handled = false;
 	}
+	input->crankDeltaHandled = false;
+	input->crankAnglePrev = input->crankAngle;
 	
 	PDButtons currentBtnBits = (PDButtons)0;
 	PDButtons pressedBtnBits = (PDButtons)0;
 	PDButtons releasedBtnBits = (PDButtons)0;
 	pd->system->getButtonState(&currentBtnBits, &pressedBtnBits, &releasedBtnBits);
-	
 	UpdateAppInputBtnState(Btn_A,     IsFlagSet(currentBtnBits, kButtonA));
 	UpdateAppInputBtnState(Btn_B,     IsFlagSet(currentBtnBits, kButtonB));
 	UpdateAppInputBtnState(Btn_Right, IsFlagSet(currentBtnBits, kButtonRight));
 	UpdateAppInputBtnState(Btn_Down,  IsFlagSet(currentBtnBits, kButtonDown));
 	UpdateAppInputBtnState(Btn_Left,  IsFlagSet(currentBtnBits, kButtonLeft));
 	UpdateAppInputBtnState(Btn_Up,    IsFlagSet(currentBtnBits, kButtonUp));
+	
+	input->crankAngle = pd->system->getCrankAngle();
+	input->crankDelta = input->crankAngle - input->crankAnglePrev;
+	input->crankMoved = BasicallyEqualR32(input->crankAngle, input->crankAnglePrev, CRANK_DELTA_DEADZONE);
+	input->crankAngleRadians = ToRadians32(input->crankAngle);
+	UpdateAppInputBtnState(Btn_CrankDock, pd->system->isCrankDocked());
+	UpdateAppInputBtnState(Btn_CrankCw, (input->crankDelta >= CRANK_BTN_DEADZONE));
+	UpdateAppInputBtnState(Btn_CrankCcw, (input->crankDelta <= -CRANK_BTN_DEADZONE));
+	
+	pd->system->getAccelerometer(&input->accelVec.x, &input->accelVec.y, &input->accelVec.z);
 	
 	for (u64 bIndex = 0; bIndex < ArrayCount(input->btnStates); bIndex++)
 	{
@@ -66,42 +77,24 @@ void UpdateAppInput()
 	}
 }
 
-bool WasBtnHandled(Btn_t btn)
-{
-	return input->btnStates[btn].handled;
-}
-void HandleBtn(Btn_t btn)
-{
-	input->btnStates[btn].handled = true;
-}
-void HandleBtnExtended(Btn_t btn)
-{
-	input->btnStates[btn].handled = true;
-	input->btnStates[btn].handledExtended = true;
-}
+inline bool WasBtnHandled(Btn_t btn)     { return input->btnStates[btn].handled;                                               }
+inline void HandleBtn(Btn_t btn)         { input->btnStates[btn].handled = true;                                               }
+inline void HandleBtnExtended(Btn_t btn) { input->btnStates[btn].handled = true; input->btnStates[btn].handledExtended = true; }
+inline bool WasCrankDeltaHandled()       { return input->crankDeltaHandled;                                                    }
+inline void HandleCrankDelta()           { input->crankDeltaHandled = true;                                                    }
+inline void HandleCrankDocked()          { HandleBtn(Btn_CrankDock);                                                           }
+inline void HandleCrankDockedExtended()  { HandleBtnExtended(Btn_CrankDock);                                                   }
 
-bool BtnDownRaw(Btn_t btn)
-{
-	return input->btnStates[btn].isDown;
-}
-bool BtnPressedRaw(Btn_t btn)
-{
-	return input->btnStates[btn].wasPressed;
-}
-bool BtnReleasedRaw(Btn_t btn)
-{
-	return input->btnStates[btn].wasReleased;
-}
+inline bool BtnDownRaw(Btn_t btn)     { return input->btnStates[btn].isDown;                                            }
+inline bool BtnPressedRaw(Btn_t btn)  { return input->btnStates[btn].wasPressed;                                        }
+inline bool BtnReleasedRaw(Btn_t btn) { return input->btnStates[btn].wasReleased;                                       }
+inline bool BtnChangedRaw(Btn_t btn)  { return (input->btnStates[btn].wasPressed || input->btnStates[btn].wasReleased); }
+inline bool CrankMovedRaw()           { return input->crankMoved;                                                       }
+inline bool IsCrankDockedRaw()        { return BtnDownRaw(Btn_CrankDock);                                               }
 
-bool BtnDown(Btn_t btn)
-{
-	return (!WasBtnHandled(btn) && BtnDownRaw(btn));
-}
-bool BtnPressed(Btn_t btn)
-{
-	return (!WasBtnHandled(btn) && BtnPressedRaw(btn));
-}
-bool BtnReleased(Btn_t btn)
-{
-	return (!WasBtnHandled(btn) && BtnReleasedRaw(btn));
-}
+inline bool BtnDown(Btn_t btn)     { return (!WasBtnHandled(btn) && BtnDownRaw(btn));     }
+inline bool BtnPressed(Btn_t btn)  { return (!WasBtnHandled(btn) && BtnPressedRaw(btn));  }
+inline bool BtnReleased(Btn_t btn) { return (!WasBtnHandled(btn) && BtnReleasedRaw(btn)); }
+inline bool BtnChanged(Btn_t btn)  { return (!WasBtnHandled(btn) && BtnChangedRaw(btn));  }
+inline bool CrankMoved()           { return (!WasCrankDeltaHandled() && CrankMovedRaw()); }
+inline bool IsCrankDocked()        { return BtnDown(Btn_CrankDock);                       }

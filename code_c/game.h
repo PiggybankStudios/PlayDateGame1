@@ -21,6 +21,8 @@ struct GameState_t
 	LCDFont* font;
 	
 	bool isInverted;
+	bool followingCrank;
+	v2i displayTextOldVelocity;
 	v2i displayTextPos;
 	v2i displayTextVelocity;
 };

@@ -74,6 +74,25 @@ void GameUpdate()
 		game->displayTextVelocity.y += SignOfI32(game->displayTextVelocity.y);
 	}
 	
+	if (!IsCrankDocked())
+	{
+		if (!game->followingCrank)
+		{
+			game->displayTextOldVelocity = game->displayTextVelocity;
+			pd->system->setPeripheralsEnabled(kAccelerometer);
+			game->followingCrank = true;
+		}
+		// game->displayTextVelocity = Vec2Roundi(Vec2FromAngle(input->crankAngleRadians + ThreeHalfsPi32, 3));
+		game->displayTextVelocity.x += RoundR32i(input->accelVec.x);
+		game->displayTextVelocity.y += RoundR32i(input->accelVec.y);
+	}
+	else if (game->followingCrank)
+	{
+		game->displayTextVelocity = game->displayTextOldVelocity;
+		pd->system->setPeripheralsEnabled(kNone);
+		game->followingCrank = false;
+	}
+	
 	game->displayTextPos += game->displayTextVelocity;
 	
 	if (game->displayTextPos.x < 0 || game->displayTextPos.x > ScreenSize.width  - TEXT_WIDTH)  { game->displayTextVelocity.x = -game->displayTextVelocity.x; }

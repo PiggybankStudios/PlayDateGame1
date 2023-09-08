@@ -1,4 +1,19 @@
 
+# TODO List:
+	[ ] Render images
+	[ ] String measure using font?
+	[ ] Which fonts are pre-installed?
+	[ ] Custom font
+	[ ] Timing information, LocalTime, ProgramTime, TimeScale
+	[ ] FPS graph?
+	[ ] Debug input? and Debug Commands
+	[ ] Debug Console (overlay?)
+	[ ] File System Wrappers
+	[ ] SaveGame system
+	[ ] Sound Effects
+	[ ] Music manager
+	[ ] 
+
 # Notes during Setup
 	[ ] "https://help.play.date/hardware/get-started/"
 	[ ] "https://play.date/dev/"
@@ -251,3 +266,6 @@
 		XCOPY ".\%OutputElfName%" "%DataDirectory%\" /Y > NUL
 	)
 #
+
+# Completed TODO List Items
+[X] Crank and Accelerometer Input data
