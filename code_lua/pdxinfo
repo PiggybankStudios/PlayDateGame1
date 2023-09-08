@@ -1,0 +1,5 @@
+name=Game 1
+author=Taylor Robbins
+description=A small game to test the C API for PlayDate
+bundleID=com.piggybankstudios.game1
+imagePath=
