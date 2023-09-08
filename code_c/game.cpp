@@ -41,7 +41,7 @@ void GameInitialize()
 		AssertMsg(false, "Couldn't load font!");
 	}
 	
-	game->pigTexture = LoadTexture(NewStr("Resources/Sprites/pig"));
+	game->pigTexture = LoadTexture(NewStr("Resources/Sprites/pig64"));
 	Assert(game->pigTexture.isValid);
 	
 	app->fpsDisplayMenuItem = pd->system->addCheckmarkMenuItem("FPS", 1, FpsToggledCallback, nullptr);
@@ -65,6 +65,13 @@ void GameInitialize()
 // +--------------------------------------------------------------+
 void GameUpdate()
 {
+	MyStr_t pigEngineText = NewStr("Pig Engine");
+	v2i pigEngineTextSize = MeasureText(game->font, pigEngineText);
+	v2i totalWidgetSize = NewVec2i(
+		MaxI32(game->pigTexture.width, pigEngineTextSize.width),
+		game->pigTexture.height + pigEngineTextSize.height
+	);
+	
 	if (BtnPressed(Btn_A))
 	{
 		HandleBtnExtended(Btn_A);
@@ -98,8 +105,8 @@ void GameUpdate()
 	
 	game->pigPos += game->pigVel;
 	
-	if (game->pigPos.x < 0 || game->pigPos.x > ScreenSize.width  - game->pigTexture.width)  { game->pigVel.x = -game->pigVel.x; }
-	if (game->pigPos.y < 0 || game->pigPos.y > ScreenSize.height - game->pigTexture.height) { game->pigVel.y = -game->pigVel.y; }
+	if (game->pigPos.x < 0 || game->pigPos.x > ScreenSize.width  - totalWidgetSize.width)  { game->pigVel.x = -game->pigVel.x; }
+	if (game->pigPos.y < 0 || game->pigPos.y > ScreenSize.height - totalWidgetSize.height) { game->pigVel.y = -game->pigVel.y; }
 	
 	// +==============================+
 	// |            Render            |
@@ -107,9 +114,11 @@ void GameUpdate()
 	pd->graphics->clear(game->isInverted ? kColorBlack : kColorWhite);
 	pd->graphics->setDrawMode(game->isInverted ? kDrawModeInverted : kDrawModeCopy);
 	
+	reci pigIconRec = NewReci(game->pigPos, game->pigTexture.size);
+	v2i pigEngineTextPos = pigIconRec.topLeft + NewVec2i(0, pigIconRec.height);
 	pd->graphics->setFont(game->font);
-	// PdDrawText(NewStr(DISPLAY_TEXT), game->pigPos);
-	pd->graphics->drawRotatedBitmap(game->pigTexture.bitmap, game->pigPos.x, game->pigPos.y, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f);
+	PdDrawText(pigEngineText, pigEngineTextPos);
+	PdDrawTexturedRec(game->pigTexture, pigIconRec);
 	
 	if (app->fpsDisplayEnabled)
 	{

@@ -17,9 +17,9 @@ Description:
 // +--------------------------------------------------------------+
 // |                         Header Files                         |
 // +--------------------------------------------------------------+
-#include "pd_api_ext.h"
 #include "texture.h"
 #include "input.h"
+#include "pd_api_ext.h"
 #include "game.h"
 #include "main.h"
 
