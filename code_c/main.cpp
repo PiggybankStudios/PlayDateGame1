@@ -1,14 +1,19 @@
 /*
-File:   main.c
+File:   main.cpp
 Author: Taylor Robbins
 Date:   09\06\2023
 Description: 
 	** Holds the main entry point for the application
 */
 
+#include "pd_api.h"
+
 #include "version.h"
 
-#include "pd_api.h"
+#include "gylib/gy_defines_check.h"
+
+#define GYLIB_LOOKUP_PRIMES_10
+#include "gylib/gy.h"
 
 // +--------------------------------------------------------------+
 // |                           setup.c                            |
@@ -53,7 +58,7 @@ int dy = 2;
 // +--------------------------------------------------------------+
 static int MainLoop(void* userdata)
 {
-	PlaydateAPI* pd = userdata;
+	PlaydateAPI* pd = (PlaydateAPI*)userdata;
 	
 	pd->graphics->clear(kColorWhite);
 	pd->graphics->setFont(font);
@@ -73,9 +78,6 @@ static int MainLoop(void* userdata)
 // +--------------------------------------------------------------+
 // |                        Event Handler                         |
 // +--------------------------------------------------------------+
-#ifdef _WINDLL
-__declspec(dllexport)
-#endif
 int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 {
 	switch (event)
@@ -168,8 +170,13 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 	return 0;
 }
 
+EXTERN_C_START
+#ifdef _WINDLL
+__declspec(dllexport)
+#endif
 int eventHandlerShim(PlaydateAPI* playdate, PDSystemEvent event, uint32_t arg)
 {
 	if (event == kEventInit) { pdrealloc = playdate->system->realloc; }
 	return eventHandler(playdate, event, arg);
 }
+EXTERN_C_END

@@ -3,9 +3,54 @@
 	[
 		{
 			"path": ".",
+			"folder_exclude_patterns":
+			[
+				"build",
+				"lib",
+				".vs",
+				"Debug",
+			],
+		},
+		{
+			"path": "build",
+			"folder_exclude_patterns":
+			[
+				".vs",
+				"*.pdx",
+			],
+			"file_exclude_patterns":
+			[
+				"*.exp",
+				"*.map",
+				"*.obj",
+				"*.ilk",
+				"*.manifest",
+				"preprocessed_output.txt",
+			],
+		},
+		{
+			"name": "GyLib",
+			"path": "lib/include/gylib",
 		},
 		{
 			"path": "C:\\Users\\robbitay\\Documents\\MyStuff\\Programs\\PlaydateSDK",
+			"folder_exclude_patterns":
+			[
+				".sentry-native",
+				"bin",
+				"Designing for Playdate",
+				"Disk",
+				"Inside Playdate",
+				"PlaydateSDK.docset",
+				"resources",
+				"C_API/buildsupport",
+				"CoreLibs/assets",
+			],
+			"file_exclude_patterns":
+			[
+				"*.html",
+				"*.css",
+			],
 		},
 	],
 	"settings":
@@ -15,9 +60,17 @@
 		],
 		"custom_constants":
 		[
+			"GYLIB_MEM_ARENA_DEBUG_ENABLED",
+			"GY_CUSTOM_STD_LIB",
+			"GY_WASM_STD_LIB",
+			"LINUX_COMPILATION",
+			"OSX_COMPILATION",
+			"PLAYDATE_COMPILATION",
 			"VERSION_BUILD",
 			"VERSION_MAJOR",
-			"VERSION_MINOR"
+			"VERSION_MINOR",
+			"WASM_COMPILATION",
+			"WINDOWS_COMPILATION",
 		],
 		"custom_functions":
 		[
@@ -27,6 +80,6 @@
 		],
 		"custom_types":
 		[
-		]
+		],
 	},
 }
