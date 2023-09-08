@@ -1,0 +1,32 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+		},
+		{
+			"path": "C:\\Users\\robbitay\\Documents\\MyStuff\\Programs\\PlaydateSDK",
+		},
+	],
+	"settings":
+	{
+		"build_options":
+		[
+		],
+		"custom_constants":
+		[
+			"VERSION_BUILD",
+			"VERSION_MAJOR",
+			"VERSION_MINOR"
+		],
+		"custom_functions":
+		[
+		],
+		"custom_globals":
+		[
+		],
+		"custom_types":
+		[
+		]
+	},
+}

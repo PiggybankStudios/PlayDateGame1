@@ -1,0 +1,4 @@
+*.sublime-workspace
+build/*
+!build/build.bat
+data/pdex.dll

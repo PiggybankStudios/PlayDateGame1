@@ -1,0 +1,230 @@
+
+# Notes during Setup
+	[ ] "https://help.play.date/hardware/get-started/"
+	[ ] "https://play.date/dev/"
+	[ ] "https://sdk.play.date/2.0.3/Inside%20Playdate%20with%20C.html#_how_to_use_the_c_api"
+	[ ] Download AArch32 bare-metal target (arm-non-eabi) "https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads"
+	[ ] Pulp "https://play.date/pulp/"
+
+# Useful Defines from pd_api.h
+	[ ] LCD_COLUMNS     // 400
+	[ ] LCD_ROWS        // 240
+	[ ] LCD_ROWSIZE     // 52
+	[ ] LCD_SCREEN_RECT // LCDMakeRect(0,0,LCD_COLUMNS,LCD_ROWS)
+
+# Compiler Options used by Example Projects
+	@ Windows CMake -> VS Solution (Compiler)
+		[ ] /ifcOutput "hello_world.dir\Debug\" // ?
+		[ ] /GS // ?
+		[ ] /W3 // ?
+		[ ] /Zc:wchar_t // ?
+		[ ] /I"C:\Users\robbitay\Documents\MyStuff\Programs\PlayDateSDK\C_API" // ?
+		[ ] /Zi // ?
+		[ ] /Gm- // ?
+		[ ] /Od // ?
+		[ ] /Ob0 // ?
+		[ ] /Fd"hello_world.dir\Debug\vc143.pdb" // ?
+		[ ] /Zc:inline // ?
+		[ ] /fp:precise // ?
+		[ ] /D "_WINDLL" // ?
+		[ ] /D "_MBCS" // ?
+		[ ] /D "WIN32" // ?
+		[ ] /D "_WINDOWS" // ?
+		[ ] /D "TARGET_SIMULATOR=1" // ?
+		[ ] /D "_WINDLL=1" // ?
+		[ ] /D "TARGET_EXTENSION=1" // ?
+		[ ] /D "CMAKE_INTDIR=\"Debug\"" // ?
+		[ ] /D "hello_world_EXPORTS" // ?
+		[ ] /errorReport:prompt // ?
+		[ ] /WX- // ?
+		[ ] /Zc:forScope // ?
+		[ ] /RTC1 // ?
+		[ ] /std:c11 // ?
+		[ ] /Gd // ?
+		[ ] /MDd // ?
+		[ ] /Fa"hello_world.dir\Debug\" // ?
+		[ ] /Fo"hello_world.dir\Debug\" // ?
+		[ ] /Fp"hello_world.dir\Debug\hello_world.pch" // ?
+		[ ] /diagnostics:column  // ?
+	@ Windows CMake -> VS Solution (Linker)
+		[ ] /OUT:"C:\Users\robbitay\Documents\MyStuff\Programs\PlaydateSDK\C_API\Examples\Hello World\build\Debug\hello_world.dll" // ?
+		[ ] /MANIFEST // ?
+		[ ] /NXCOMPAT // ?
+		[ ] /PDB:"C:/Users/robbitay/Documents/MyStuff/Programs/PlaydateSDK/C_API/Examples/Hello World/build/Debug/hello_world.pdb" // ?
+		[ ] /DYNAMICBASE // ?
+		[ ] "kernel32.lib" // ?
+		[ ] "user32.lib" // ?
+		[ ] "gdi32.lib" // ?
+		[ ] "winspool.lib" // ?
+		[ ] "shell32.lib" // ?
+		[ ] "ole32.lib" // ?
+		[ ] "oleaut32.lib" // ?
+		[ ] "uuid.lib" // ?
+		[ ] "comdlg32.lib" // ?
+		[ ] "advapi32.lib" // ?
+		[ ] /IMPLIB:"C:/Users/robbitay/Documents/MyStuff/Programs/PlaydateSDK/C_API/Examples/Hello World/build/Debug/hello_world.lib" // ?
+		[ ] /DEBUG // ?
+		[ ] /DLL // ?
+		[ ] /MACHINE:X64 // ?
+		[ ] /INCREMENTAL // ?
+		[ ] /PGD:"C:\Users\robbitay\Documents\MyStuff\Programs\PlaydateSDK\C_API\Examples\Hello World\build\Debug\hello_world.pgd" // ?
+		[ ] /SUBSYSTEM:CONSOLE // ?
+		[ ] /MANIFESTUAC:"level='asInvoker' uiAccess='false'" // ?
+		[ ] /ManifestFile:"hello_world.dir\Debug\hello_world.dll.intermediate.manifest" // ?
+		[ ] /LTCGOUT:"hello_world.dir\Debug\hello_world.iobj" // ?
+		[ ] /ERRORREPORT:PROMPT // ?
+		[ ] /ILK:"hello_world.dir\Debug\hello_world.ilk" // ?
+		[ ] /NOLOGO // ?
+		[ ] /TLBID:1 // ?
+	@ arm-none-eabi-gcc on each .c file
+		[ ] -g3 // ?
+		[ ] -c // ?
+		[ ] -mthumb // ?
+		[ ] -mcpu=cortex-m7 // ?
+		[ ] -mfloat-abi=hard // ?
+		[ ] -mfpu=fpv5-sp-d16 // ?
+		[ ] -D__FPU_USED=1 // ?
+		[ ] -O2 // ?
+		[ ] -falign-functions=16 // ?
+		[ ] -fomit-frame-pointer // ?
+		[ ] -gdwarf-2 // ?
+		[ ] -Wall // ?
+		[ ] -Wno-unused // ?
+		[ ] -Wstrict-prototypes // ?
+		[ ] -Wno-unknown-pragmas // ?
+		[ ] -fverbose-asm // ?
+		[ ] -Wdouble-promotion // ?
+		[ ] -mword-relocations // ?
+		[ ] -fno-common // ?
+		[ ] -ffunction-sections // ?
+		[ ] -fdata-sections // ?
+		[ ] -Wa,-ahlms=build/$(notdir $(<:.c=.lst)) // ?
+		[ ] -DTARGET_PLAYDATE=1 // ?
+		[ ] -DTARGET_EXTENSION=1 // ?
+		[ ] -MD // ?
+		[ ] -MP // ?
+		[ ] -MF build/deps/$(@F).d // ?
+		[ ] -I C:\Users\robbitay\Documents\MyStuff\Programs\PlaydateSDK\C_API // ?
+		[ ] $< // ?
+		[ ] -o // ?
+		[ ] $@ // ?
+	@ arm-none-eabi-gcc on all .o files
+		main.o
+		-nostartfiles
+		-mthumb
+		-mcpu=cortex-m7
+		-mfloat-abi=hard
+		-mfpu=fpv5-sp-d16
+		-D__FPU_USED=1
+		-TC:\Users\robbitay\Documents\MyStuff\Programs\PlaydateSDK\C_API\buildsupport\link_map.ld
+		-Wl
+			,-Map=build/pdex.map
+			,--cref
+			,--gc-sections
+			,--no-warn-mismatch
+			,--emit-relocs
+		-o build/pdex.elf
+	@ gcc to produce .so or .dylib straight from source (for simulator)
+		[ ] -shared // ?
+		[ ] -fPIC // ?
+		[ ] -lm // ?
+		[ ] -DTARGET_SIMULATOR=1 // ?
+		[ ] -DTARGET_EXTENSION=1 // ?
+		[ ] -I C:\Users\robbitay\Documents\MyStuff\Programs\PlaydateSDK\C_API // ?
+		[ ] -o build/pdex.so // ?
+		[ ] main.c // ?
+		[ ] C:\Users\robbitay\Documents\MyStuff\Programs\PlaydateSDK\C_API\buildsupport\setup.c // ?
+	@ arm-none-eabi-objcopy run on .so to produce ?
+		[ ] pdex.so
+		[ ] Source
+#
+
+# pdc.exe
+	usage: ..\..\..\bin\pdc [-sdkpath <path>] [-I <path>] [-s] [-u] [-m] [--version] <input> [output]
+		input: folder containing scripts and assets (or lua source, with -m flag)
+		output: folder for compiled game resources (will be created, defaults to <input>.pdx)
+		-sdkpath: use the SDK at the given path instead of the default
+		-I/--libpath: add the given path to the list of folders to search when resolving imports
+		-s/--strip: strip debug symbols
+		-u/--no-compress: don't compress output files
+		-m/--main: compile lua script at <input> as if it were main.lua
+		-v/--verbose: verbose mode, gives info about what is happening
+		-q/--quiet: quiet mode, suppresses non-error output
+		-k/--skip-unknown: skip unrecognized files instead of copying them to the pdx folder
+		--version: show pdxversion
+#
+
+# arm-none-eabi-gcc --help
+	Usage: arm-none-eabi-gcc [options] file...
+	Options:
+		-pass-exit-codes         Exit with highest error code from a phase.
+		--help                   Display this information.
+		--target-help            Display target specific command line options (including assembler and linker options).
+		--help={common|optimizers|params|target|warnings|[^]{joined|separate|undocumented}}[,...]. Display specific types of command line options. (Use '-v --help' to display command line options of sub-processes).
+		--version                Display compiler version information.
+		-dumpspecs               Display all of the built in spec strings.
+		-dumpversion             Display the version of the compiler.
+		-dumpmachine             Display the compiler's target processor.
+		-foffload=<targets>      Specify offloading targets.
+		-print-search-dirs       Display the directories in the compiler's search path.
+		-print-libgcc-file-name  Display the name of the compiler's companion library.
+		-print-file-name=<lib>   Display the full path to library <lib>.
+		-print-prog-name=<prog>  Display the full path to compiler component <prog>.
+		-print-multiarch         Display the target's normalized GNU triplet, used as a component in the library path.
+		-print-multi-directory   Display the root directory for versions of libgcc.
+		-print-multi-lib         Display the mapping between command line options and multiple library search directories.
+		-print-multi-os-directory Display the relative path to OS libraries.
+		-print-sysroot           Display the target libraries directory.
+		-print-sysroot-headers-suffix Display the sysroot suffix used to find headers.
+		-Wa,<options>            Pass comma-separated <options> on to the assembler.
+		-Wp,<options>            Pass comma-separated <options> on to the preprocessor.
+		-Wl,<options>            Pass comma-separated <options> on to the linker.
+		-Xassembler <arg>        Pass <arg> on to the assembler.
+		-Xpreprocessor <arg>     Pass <arg> on to the preprocessor.
+		-Xlinker <arg>           Pass <arg> on to the linker.
+		-save-temps              Do not delete intermediate files.
+		-save-temps=<arg>        Do not delete intermediate files.
+		-no-canonical-prefixes   Do not canonicalize paths when building relative prefixes to other gcc components.
+		-pipe                    Use pipes rather than intermediate files.
+		-time                    Time the execution of each subprocess.
+		-specs=<file>            Override built-in specs with the contents of <file>.
+		-std=<standard>          Assume that the input sources are for <standard>.
+		--sysroot=<directory>    Use <directory> as the root directory for headers and libraries.
+		-B <directory>           Add <directory> to the compiler's search paths.
+		-v                       Display the programs invoked by the compiler.
+		-###                     Like -v but options quoted and commands not executed.
+		-E                       Preprocess only; do not compile, assemble or link.
+		-S                       Compile only; do not assemble or link.
+		-c                       Compile and assemble, but do not link.
+		-o <file>                Place the output into <file>.
+		-pie                     Create a dynamically linked position independent executable.
+		-shared                  Create a shared library.
+		-x <language>            Specify the language of the following input files. Permissible languages include: c c++ assembler none 'none' means revert to the default behavior of guessing the language based on the file's extension.
+	
+	Options starting with -g, -f, -m, -O, -W, or --param are automatically
+	 passed on to the various sub-processes invoked by arm-none-eabi-gcc.  In order to pass
+	 other options on to these processes the -W<letter> options must be used.
+	
+	For bug reporting instructions, please see:
+	<https://bugs.linaro.org/>.
+#
+
+# Old build.bat lines:
+	set LinuxCompilerFlags=-mthumb -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-sp-d16 -D__FPU_USED=1 -O2 -falign-functions=16 -fomit-frame-pointer -gdwarf-2
+	set LinuxCompilerFlags=%LinuxCompilerFlags% -Wall -Wno-unused -Wstrict-prototypes -Wno-unknown-pragmas -fverbose-asm -Wdouble-promotion -mword-relocations -fno-common -ffunction-sections -fdata-sections
+	set LinuxCompilerFlags=%LinuxCompilerFlags% -DTARGET_PLAYDATE=1 -DTARGET_EXTENSION=1 -MD -MP
+	set LinuxCompilerFlags=%LinuxCompilerFlags% -DWINDOWS_COMPILATION -DPROJECT_NAME="\"%ProjectName%\"" -DPROJECT_NAME_SAFE=\"%ProjectNameSafe%\" -DDEBUG_BUILD=%DebugBuild% -DDEVELOPER_BUILD=%DeveloperBuild% -DDEMO_BUILD=%DemoBuild% -DSTEAM_BUILD=0 -DPROCMON_SUPPORTED=0 -DSOCKETS_SUPPORTED=1 -DBOX2D_SUPPORTED=0 -DOPENGL_SUPPORTED=0 -DVULKAN_SUPPORTED=0 -DDIRECTX_SUPPORTED=0 -DSLUG_SUPPORTED=0 -DJSON_SUPPORTED=0 -DASSERTIONS_ENABLED=%AssertionsEnabled%
+	set LinuxLinkerFlags=-nostartfiles -mthumb -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-sp-d16 -D__FPU_USED=1
+	set LinuxLinkerFlags=%LinuxLinkerFlags% -T%PlaydateSdkDirectory%\C_API\buildsupport\link_map.ld
+	set LinuxLinkerFlags=%LinuxLinkerFlags% -Wl,-Map=%OutputMapName%,--cref,--gc-sections,--no-warn-mismatch,--emit-relocs
+	set SimCompilerFlags=-shared -fPIC -lm
+	set SimCompilerFlags=%SimCompilerFlags% -DTARGET_SIMULATOR=1 -DTARGET_EXTENSION=1
+	if "%SimulatorBuild%"=="1" (
+		%SimCompilerExeName% %SimCompilerFlags% %IncludeDirectories% -o %OutputLibName% %MainSourcePath%
+		arm-none-eabi-objcopy %OutputLibName% %DataDirectory%\pdex.fin
+	) else (
+		%ArmCompilerExeName% -g3 -c %CompilerFlags% %IncludeDirectories% %MainSourcePath%
+		%ArmCompilerExeName% main.o %LinkerFlags% -o %OutputElfName%
+		XCOPY ".\%OutputElfName%" "%DataDirectory%\" /Y > NUL
+	)
+#
