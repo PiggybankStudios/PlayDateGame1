@@ -21,6 +21,10 @@ struct AppState_t
 	MemArena_t fixedHeap;
 	MemArena_t mainHeap;
 	
+	AppInput_t input;
+	
+	PDMenuItem* fpsDisplayMenuItem;
+	bool fpsDisplayEnabled;
 	PDMenuItem* debugConsoleMenuItem;
 	bool debugConsoleEnabled;
 	

@@ -23,3 +23,8 @@ const char* GetPDSystemEventStr(PDSystemEvent event)
 		default: return "Unknown";
 	}
 }
+
+void PdDrawText(MyStr_t text, v2i position)
+{
+	pd->graphics->drawText(text.chars, text.length, kUTF8Encoding, position.x, position.y);
+}

@@ -15,6 +15,20 @@
 	[ ] Total Size: 76mm x 74mm x 9mm
 	[ ] Cost: $199
 
+# Simulator Keyboard Shortcuts
+	[ ] Restart              Cmd/Ctrl-R
+	[ ] Pause                Space
+	[ ] Lock                 Cmd/Ctrl-L
+	[ ] Menu                 Escape
+	[ ] Crank Forward        [
+	[ ] Crank Backward       ]
+	[ ] Volume Down          -
+	[ ] Volume Up            =
+	[ ] Toggle Full Screen   Fn-F
+	[ ] Rotate Display Left  Cmd/Ctrl ◀︎
+	[ ] Rotate Display Right Cmd/Ctrl ▶︎
+	[ ] 2x Display           Cmd/Ctrl-2
+
 # Useful Defines from pd_api.h
 	[ ] LCD_COLUMNS     // 400
 	[ ] LCD_ROWS        // 240

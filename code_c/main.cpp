@@ -17,6 +17,7 @@ Description:
 // +--------------------------------------------------------------+
 // |                         Header Files                         |
 // +--------------------------------------------------------------+
+#include "input.h"
 #include "game.h"
 #include "main.h"
 
@@ -27,6 +28,7 @@ PlaydateAPI* pd = nullptr;
 AppState_t* app = nullptr;
 MemArena_t* fixedHeap = nullptr;
 MemArena_t* mainHeap = nullptr;
+AppInput_t* input = nullptr;
 GameState_t* game = nullptr;
 
 const v2i ScreenSize = { LCD_COLUMNS, LCD_ROWS };
@@ -36,6 +38,7 @@ const v2i ScreenSize = { LCD_COLUMNS, LCD_ROWS };
 // +--------------------------------------------------------------+
 #include "pd_api_helpers.cpp"
 #include "debug.cpp"
+#include "input.cpp"
 #include "game.cpp"
 
 // +--------------------------------------------------------------+
@@ -49,6 +52,7 @@ int MainUpdateCallback(void* userData)
 		app->firstUpdateCalled = true;
 	}
 	
+	UpdateAppInput();
 	GameUpdate();
 	
 	return 0;
@@ -56,10 +60,7 @@ int MainUpdateCallback(void* userData)
 
 void HandleSystemEvent(PDSystemEvent event, uint32_t arg)
 {
-	if (app != nullptr)
-	{
-		PrintLine_D("Event: %s %u", GetPDSystemEventStr(event));
-	}
+	// if (app != nullptr) { PrintLine_D("Event: %s %u", GetPDSystemEventStr(event)); }
 	
 	switch (event)
 	{
@@ -96,6 +97,9 @@ void HandleSystemEvent(PDSystemEvent event, uint32_t arg)
 			WriteLine_O("+==============================+");
 			
 			WriteLine_N("Initializing...");
+			input = &app->input;
+			InitializeAppInput();
+			
 			GameInitialize();
 			
 			pd->system->setUpdateCallback(MainUpdateCallback, nullptr);

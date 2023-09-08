@@ -20,10 +20,9 @@ struct GameState_t
 	
 	LCDFont* font;
 	
-	int displayTextX;
-	int displayTextY;
-	int displayTextDx;
-	int displayTextDy;
+	bool isInverted;
+	v2i displayTextPos;
+	v2i displayTextVelocity;
 };
 
 #endif //  _GAME_H

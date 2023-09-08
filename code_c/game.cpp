@@ -9,6 +9,15 @@ Description:
 // +--------------------------------------------------------------+
 // |                           Helpers                            |
 // +--------------------------------------------------------------+
+void FpsToggledCallback(void* userData)
+{
+	bool newValue = (pd->system->getMenuItemValue(app->fpsDisplayMenuItem) != 0);
+	if (app->fpsDisplayEnabled != newValue)
+	{
+		app->fpsDisplayEnabled = newValue;
+		PrintLine_I("FPS Display %s", app->fpsDisplayEnabled ? "Enabled" : "Disabled");
+	}
+}
 void DebugConsoleToggledCallback(void* userData)
 {
 	bool newValue = (pd->system->getMenuItemValue(app->debugConsoleMenuItem) != 0);
@@ -32,14 +41,18 @@ void GameInitialize()
 		AssertMsg(false, "Couldn't load font!");
 	}
 	
-	app->debugConsoleMenuItem = pd->system->addCheckmarkMenuItem("Debug Console", 1, DebugConsoleToggledCallback, nullptr);
+	app->fpsDisplayMenuItem = pd->system->addCheckmarkMenuItem("FPS", 1, FpsToggledCallback, nullptr);
+	NotNull(app->fpsDisplayMenuItem);
+	pd->system->setMenuItemValue(app->fpsDisplayMenuItem, app->fpsDisplayEnabled ? 1 : 0);
+	
+	app->debugConsoleMenuItem = pd->system->addCheckmarkMenuItem("Debug", 1, DebugConsoleToggledCallback, nullptr);
 	NotNull(app->debugConsoleMenuItem);
 	pd->system->setMenuItemValue(app->debugConsoleMenuItem, app->debugConsoleEnabled ? 1 : 0);
 	
-	game->displayTextX = (400-TEXT_WIDTH)/2;
-	game->displayTextY = (240-TEXT_HEIGHT)/2;
-	game->displayTextDx = 1;
-	game->displayTextDy = 2;
+	game->displayTextPos.x = (400 - TEXT_WIDTH) / 2;
+	game->displayTextPos.y = (240 - TEXT_HEIGHT) / 2;
+	game->displayTextVelocity.x = 1;
+	game->displayTextVelocity.y = 2;
 	
 	game->initialized = true;
 }
@@ -49,15 +62,34 @@ void GameInitialize()
 // +--------------------------------------------------------------+
 void GameUpdate()
 {
-	pd->graphics->clear(kColorWhite);
+	if (BtnPressed(Btn_A))
+	{
+		HandleBtnExtended(Btn_A);
+		game->isInverted = !game->isInverted;
+	}
+	if (BtnPressed(Btn_B))
+	{
+		HandleBtnExtended(Btn_B);
+		game->displayTextVelocity.x += SignOfI32(game->displayTextVelocity.x);
+		game->displayTextVelocity.y += SignOfI32(game->displayTextVelocity.y);
+	}
+	
+	game->displayTextPos += game->displayTextVelocity;
+	
+	if (game->displayTextPos.x < 0 || game->displayTextPos.x > ScreenSize.width  - TEXT_WIDTH)  { game->displayTextVelocity.x = -game->displayTextVelocity.x; }
+	if (game->displayTextPos.y < 0 || game->displayTextPos.y > ScreenSize.height - TEXT_HEIGHT) { game->displayTextVelocity.y = -game->displayTextVelocity.y; }
+	
+	// +==============================+
+	// |            Render            |
+	// +==============================+
+	pd->graphics->clear(game->isInverted ? kColorBlack : kColorWhite);
+	pd->graphics->setDrawMode(game->isInverted ? kDrawModeInverted : kDrawModeCopy);
+	
 	pd->graphics->setFont(game->font);
-	pd->graphics->drawText(DISPLAY_TEXT, strlen(DISPLAY_TEXT), kASCIIEncoding, game->displayTextX, game->displayTextY);
+	PdDrawText(NewStr(DISPLAY_TEXT), game->displayTextPos);
 	
-	game->displayTextX += game->displayTextDx;
-	game->displayTextY += game->displayTextDy;
-	
-	if (game->displayTextX < 0 || game->displayTextX > ScreenSize.width - TEXT_WIDTH) { game->displayTextDx = -game->displayTextDx; }
-	if (game->displayTextY < 0 || game->displayTextY > ScreenSize.height - TEXT_HEIGHT) { game->displayTextDy = -game->displayTextDy; }
-	
-	pd->system->drawFPS(0,0);
+	if (app->fpsDisplayEnabled)
+	{
+		pd->system->drawFPS(0,0);
+	}
 }
