@@ -43,6 +43,27 @@ const char* GetPDLanguageStr(PDLanguage language)
 // +--------------------------------------------------------------+
 // |                          Functions                           |
 // +--------------------------------------------------------------+
+struct BitmapData_t
+{
+	v2i size;
+	i32 rowWidth;
+	u8* mask;
+	u8* data;
+};
+BitmapData_t GetBitmapData(LCDBitmap* bitmap, bool sizeOnly = false)
+{
+	BitmapData_t result = {};
+	pd->graphics->getBitmapData(
+		bitmap,
+		&result.size.width,
+		&result.size.height,
+		&result.rowWidth, //rowbytes
+		(sizeOnly ? nullptr : &result.mask), //mask
+		(sizeOnly ? nullptr : &result.data) //data
+	);
+	return result;
+}
+
 v2i GetBitmapSize(LCDBitmap* bitmap)
 {
 	v2i result = Vec2i_Zero;
@@ -56,6 +77,7 @@ v2i GetBitmapSize(LCDBitmap* bitmap)
 	);
 	return result;
 }
+
 v2i MeasureText(LCDFont* font, MyStr_t text, i32 tracking = 0)
 {
 	v2i result;

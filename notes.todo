@@ -16,6 +16,7 @@
 	[ ] Download AArch32 bare-metal target (arm-non-eabi) "https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads"
 	[ ] Pulp "https://play.date/pulp/"
 	[ ] Caps (Font Import Tool) "https://play.date/caps/"
+	[ ] Arcade Fonts Collection "https://idleberg.github.io/playdate-arcade-fonts"
 
 # PlayDate Specs:
 	[ ] "https://help.play.date/hardware/the-specs/"
@@ -264,6 +265,7 @@
 #
 
 # Completed TODO List Items
+[X] Font_t structure
 [X] Custom font
 [X] Which fonts are pre-installed?
 [X] Timing information, LocalTime, ProgramTime, TimeScale

@@ -7,9 +7,10 @@ Date:   09\08\2023
 #ifndef _GAME_H
 #define _GAME_H
 
-#define MAIN_FONT_PATH "/System/Fonts/Asheville-Sans-14-Bold.pft"
-// #define SMALL_FONT_PATH "/System/Fonts/Roobert-10-Bold.pft"
-#define SMALL_FONT_PATH "Resources/Fonts/pixel8"
+#define MAIN_FONT_PATH  "/System/Fonts/Asheville-Sans-14-Bold.pft"
+#define SMALL_FONT_PATH "/System/Fonts/Roobert-10-Bold.pft"
+#define DEBUG_FONT_PATH "Resources/Fonts/pixel8"
+#define GAME_FONT_PATH  "Resources/Fonts/MVP"
 
 // #define TEXT_WIDTH 112
 // #define TEXT_HEIGHT 16
@@ -22,8 +23,10 @@ struct GameState_t
 	PDMenuItem* backgroundMenuItem;
 	bool backgroundEnabled;
 	
-	LCDFont* mainFont;
-	LCDFont* smallFont;
+	Font_t mainFont;
+	Font_t smallFont;
+	Font_t debugFont;
+	Font_t gameFont;
 	
 	SpriteSheet_t testSheet;
 	SpriteSheet_t pieSheet;

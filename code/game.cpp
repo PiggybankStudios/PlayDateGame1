@@ -29,21 +29,14 @@ void GameInitialize()
 	NotNull(game->backgroundMenuItem);
 	pd->system->setMenuItemValue(game->backgroundMenuItem, game->backgroundEnabled ? 1 : 0);
 	
-	const char* loadFontErrorStr;
-	
-	game->mainFont = pd->graphics->loadFont(MAIN_FONT_PATH, &loadFontErrorStr);
-	if (game->mainFont == NULL)
-	{
-		PrintLine_E("Couldn't load mainFont %s: %s", MAIN_FONT_PATH, loadFontErrorStr);
-		AssertMsg(false, "Couldn't load mainFont!");
-	}
-	
-	game->smallFont = pd->graphics->loadFont(SMALL_FONT_PATH, &loadFontErrorStr);
-	if (game->smallFont == NULL)
-	{
-		PrintLine_E("Couldn't load smallFont %s: %s", SMALL_FONT_PATH, loadFontErrorStr);
-		AssertMsg(false, "Couldn't load smallFont!");
-	}
+	game->mainFont = LoadFont(NewStr(MAIN_FONT_PATH), "mainFont");
+	Assert(game->mainFont.isValid);
+	game->smallFont = LoadFont(NewStr(SMALL_FONT_PATH), "smallFont");
+	Assert(game->smallFont.isValid);
+	game->debugFont = LoadFont(NewStr(DEBUG_FONT_PATH), "debugFont");
+	Assert(game->debugFont.isValid);
+	game->gameFont = LoadFont(NewStr(GAME_FONT_PATH), "gameFont");
+	Assert(game->gameFont.isValid);
 	
 	game->testSheet = LoadSpriteSheet(NewStr("Resources/Sheets/test"), 5);
 	Assert(game->testSheet.isValid);
@@ -75,7 +68,7 @@ void GameUpdate()
 	MemArena_t* scratch = GetScratchArena();
 	
 	MyStr_t pigEngineText = NewStr("Pig Engine");
-	v2i pigEngineTextSize = MeasureText(game->mainFont, pigEngineText);
+	v2i pigEngineTextSize = MeasureText(game->mainFont.font, pigEngineText);
 	v2i totalWidgetSize = NewVec2i(
 		MaxI32(game->pigTexture.width, pigEngineTextSize.width),
 		game->pigTexture.height + pigEngineTextSize.height
@@ -157,7 +150,7 @@ void GameUpdate()
 		reci pigIconRec = NewReci(Vec2Roundi(game->pigPos), game->pigTexture.size);
 		v2i pigEngineTextPos = pigIconRec.topLeft + NewVec2i(0, pigIconRec.height);
 		pd->graphics->setDrawMode(kDrawModeNXOR);
-		pd->graphics->setFont(game->mainFont);
+		pd->graphics->setFont(game->mainFont.font);
 		PdDrawText(pigEngineText, pigEngineTextPos);
 		pd->graphics->setDrawMode(defaultDrawMode);
 		PdDrawTexturedRec(game->pigTexture, pigIconRec);
@@ -183,20 +176,62 @@ void GameUpdate()
 		pd->graphics->setDrawMode(kDrawModeNXOR);
 		
 		v2i textPos = NewVec2i(1, 1);
-		pd->graphics->setFont(game->smallFont);
-		i32 fontHeight = pd->graphics->getFontHeight(game->smallFont);
+		pd->graphics->setFont(game->debugFont.font);
+		i32 stepY = game->debugFont.lineHeight + 1;
 		
-		PdDrawTextPrint(textPos, "ProgramTime: %u (%u)", ProgramTime, input->realProgramTime);
-		textPos.y += fontHeight;
+		// PdDrawTextPrint(textPos, "ProgramTime: %u (%u)", ProgramTime, input->realProgramTime);
+		// textPos.y += stepY;
 		
-		PdDrawTextPrint(textPos, "ElapsedMs: %u (%u)", input->elapsedMsU32, input->realElapsedMsU32);
-		textPos.y += fontHeight;
+		// PdDrawTextPrint(textPos, "ElapsedMs: %u (%u)", input->elapsedMsU32, input->realElapsedMsU32);
+		// textPos.y += stepY;
 		
-		PdDrawTextPrint(textPos, "TimeScale: %.2f (%.2f)", TimeScale, input->realTimeScale);
-		textPos.y += fontHeight;
+		// PdDrawTextPrint(textPos, "TimeScale: %.2f (%.2f)", TimeScale, input->realTimeScale);
+		// textPos.y += stepY;
 		
-		PdDrawTextPrint(textPos, "TimeSinceEpoch: %llu", input->timeSinceEpoch);
-		textPos.y += fontHeight;
+		// PdDrawTextPrint(textPos, "TimeSinceEpoch: %llu", input->timeSinceEpoch);
+		// textPos.y += stepY;
+		
+		PdDrawTextPrint(textPos, "main: %llu chars Height:%d %s", game->mainFont.numChars, game->mainFont.lineHeight, GetFontCapsStr(game->mainFont));
+		textPos.y += stepY;
+		PdDrawTextPrint(textPos, "small: %llu chars Height:%d %s", game->smallFont.numChars, game->smallFont.lineHeight, GetFontCapsStr(game->smallFont));
+		textPos.y += stepY;
+		PdDrawTextPrint(textPos, "debug: %llu chars Height:%d %s", game->debugFont.numChars, game->debugFont.lineHeight, GetFontCapsStr(game->debugFont));
+		textPos.y += stepY;
+		PdDrawTextPrint(textPos, "game: %llu chars Height:%d %s", game->gameFont.numChars, game->gameFont.lineHeight, GetFontCapsStr(game->gameFont));
+		textPos.y += stepY;
+		
+		for (u8 rangeIndex = 0; rangeIndex < FontRange_NumRanges; rangeIndex++)
+		{
+			FontRange_t range = FontRangeByIndex(rangeIndex);
+			if (FontHasRange(game->gameFont, range, true))
+			{
+				u8 numCharsInRange = GetNumCharsInFontRange(range);
+				for (u8 charIndex = 0; charIndex < numCharsInRange; charIndex++)
+				{
+					u32 codepoint = GetFontRangeChar(range, charIndex);
+					LCDFontPage* fontPage = pd->graphics->getFontPage(game->gameFont.font, codepoint);
+					if (fontPage != nullptr)
+					{
+						LCDBitmap* glyphBitmap = nullptr;
+						i32 glyphAdvance = 0;
+						LCDFontGlyph* fontGlyph = pd->graphics->getPageGlyph(fontPage, codepoint, &glyphBitmap, &glyphAdvance);
+						if (fontGlyph != nullptr && glyphBitmap != nullptr && glyphAdvance > 0)
+						{
+							v2i glyphBitmapSize = GetBitmapSize(glyphBitmap);
+							if (textPos.x + glyphAdvance > ScreenSize.width)
+							{
+								textPos.x = 1;
+								textPos.y += stepY;
+							}
+							PdDrawTexturedRec(glyphBitmap, glyphBitmapSize, NewReci(textPos, glyphBitmapSize));
+							textPos.x += glyphAdvance;
+						}
+					}
+				}
+				textPos.x = 1;
+				textPos.y += stepY;
+			}
+		}
 		
 		pd->graphics->setDrawMode(defaultDrawMode);
 	}

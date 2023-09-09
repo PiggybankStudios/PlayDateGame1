@@ -20,6 +20,8 @@ Description:
 // +--------------------------------------------------------------+
 #include "texture.h"
 #include "sprite_sheet.h"
+#include "font_range.h"
+#include "font.h"
 #include "input.h"
 #include "pd_api_ext.h"
 #include "game.h"
@@ -48,6 +50,7 @@ r32 TimeScale = 1.0f;
 #include "debug.cpp"
 #include "texture.cpp"
 #include "sprite_sheet.cpp"
+#include "font.cpp"
 #include "input.cpp"
 #include "game.cpp"
 
