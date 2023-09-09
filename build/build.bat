@@ -10,7 +10,7 @@ set DemoBuild=0
 set AssertionsEnabled=1
 
 set LibDirectory=..\lib
-set SourceDirectory=..\code_c
+set SourceDirectory=..\code
 set DataDirectory=..\data
 set PlaydateSdkDirectory=C:\Users\robbitay\Documents\MyStuff\Programs\PlaydateSDK
 set SimCompilerExeName=gcc

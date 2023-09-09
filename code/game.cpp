@@ -174,7 +174,7 @@ void GameUpdate()
 		r32 crankPercent = input->crankAngleRadians / TwoPi32;
 		i32 pieFrameIndex = RoundR32i(24 * (1.0f - crankPercent));
 		v2i pieFrame = NewVec2i(pieFrameIndex % game->pieSheet.numFramesX, pieFrameIndex / game->pieSheet.numFramesX);
-		v2i pieSize = game->pieSheet.frameSize * 3;
+		v2i pieSize = Vec2Roundi(ToVec2(game->pieSheet.frameSize) * LerpR32(1, 5, crankPercent));
 		PdDrawSheetFrame(game->pieSheet, pieFrame, NewReci(ScreenSize.width - pieSize.width, 0, pieSize));
 	}
 	
