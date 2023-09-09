@@ -18,6 +18,7 @@ Description:
 // +--------------------------------------------------------------+
 // |                         Header Files                         |
 // +--------------------------------------------------------------+
+#include "sound.h"
 #include "texture.h"
 #include "sprite_sheet.h"
 #include "font_range.h"
@@ -49,6 +50,7 @@ r32 TimeScale = 1.0f;
 // +--------------------------------------------------------------+
 #include "scratch.cpp"
 #include "debug.cpp"
+#include "sound.cpp"
 #include "texture.cpp"
 #include "sprite_sheet.cpp"
 #include "font.cpp"
@@ -86,6 +88,7 @@ int MainUpdateCallback(void* userData)
 {
 	PdBeginFrame();
 	UpdateAppInput();
+	UpdateSoundPool(&app->soundPool);
 	UpdatePerfGraph(&app->perfGraph);
 	
 	if (!app->firstUpdateCalled)
@@ -153,6 +156,7 @@ void HandleSystemEvent(PDSystemEvent event, uint32_t arg)
 			WriteLine_N("Initializing...");
 			input = &app->input;
 			InitializeAppInput();
+			InitSoundPool(&app->soundPool);
 			InitPerfGraph(&app->perfGraph);
 			
 			GameInitialize();

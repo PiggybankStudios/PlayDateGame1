@@ -4,7 +4,6 @@
 	[ ] Debug Console (overlay?)
 	[ ] File System Wrappers
 	[ ] SaveGame system
-	[ ] Sound Effects
 	[ ] Music manager
 	[ ] Support for pausing, stepping frame by frame, scaling time, etc.
 	[ ] AppState_t
@@ -267,6 +266,7 @@
 #
 
 # Completed TODO List Items
+[X] Sound Effects
 [X] FPS graph?
 [X] Font_t structure
 [X] Custom font

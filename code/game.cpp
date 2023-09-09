@@ -29,13 +29,13 @@ void GameInitialize()
 	NotNull(game->backgroundMenuItem);
 	pd->system->setMenuItemValue(game->backgroundMenuItem, game->backgroundEnabled ? 1 : 0);
 	
-	game->mainFont = LoadFont(NewStr(MAIN_FONT_PATH), "mainFont");
+	game->mainFont = LoadFont(NewStr(MAIN_FONT_PATH));
 	Assert(game->mainFont.isValid);
-	game->smallFont = LoadFont(NewStr(SMALL_FONT_PATH), "smallFont");
+	game->smallFont = LoadFont(NewStr(SMALL_FONT_PATH));
 	Assert(game->smallFont.isValid);
-	game->debugFont = LoadFont(NewStr(DEBUG_FONT_PATH), "debugFont");
+	game->debugFont = LoadFont(NewStr(DEBUG_FONT_PATH));
 	Assert(game->debugFont.isValid);
-	game->gameFont = LoadFont(NewStr(GAME_FONT_PATH), "gameFont");
+	game->gameFont = LoadFont(NewStr(GAME_FONT_PATH));
 	Assert(game->gameFont.isValid);
 	
 	game->testSheet = LoadSpriteSheet(NewStr("Resources/Sheets/test"), 5);
@@ -45,12 +45,13 @@ void GameInitialize()
 	
 	game->pieSheet = LoadSpriteSheet(NewStr("Resources/Sheets/pie_badge_small"), 6);
 	Assert(game->pieSheet.isValid);
-	
 	game->backgroundTexture = LoadTexture(NewStr("Resources/Textures/background"));
 	Assert(game->backgroundTexture.isValid);
-	
 	game->pigTexture = LoadTexture(NewStr("Resources/Sprites/pig64"));
 	Assert(game->pigTexture.isValid);
+	
+	game->testSound = LoadSound(NewStr("Resources/Sounds/test"));
+	Assert(game->testSound.isValid);
 	
 	game->pigPos.x = (ScreenSize.width - game->pigTexture.width) / 2.0f;
 	game->pigPos.y = (ScreenSize.height - game->pigTexture.height) / 2.0f;
@@ -94,6 +95,8 @@ void GameUpdate()
 		HandleBtnExtended(Btn_B);
 		game->pigVel.x += SignOfR32(game->pigVel.x);
 		game->pigVel.y += SignOfR32(game->pigVel.y);
+		
+		PlaySound(&game->testSound);
 	}
 	
 	if (!IsCrankDocked())
@@ -190,6 +193,11 @@ void GameUpdate()
 		
 		// PdDrawTextPrint(textPos, "TimeSinceEpoch: %llu", input->timeSinceEpoch);
 		// textPos.y += stepY;
+		
+		u64 numSoundInstances = 0;
+		for (u64 iIndex = 0; iIndex < MAX_SOUND_INSTANCES; iIndex++) { if (app->soundPool.instances[iIndex].isPlaying) { numSoundInstances++; } }
+		PdDrawTextPrint(textPos, "%llu sound instance%s", numSoundInstances, Plural(numSoundInstances, "s"));
+		textPos.y += stepY;
 		
 		PdDrawTextPrint(textPos, "main: %llu chars Height:%d %s", game->mainFont.numChars, game->mainFont.lineHeight, GetFontCapsStr(game->mainFont));
 		textPos.y += stepY;

@@ -34,6 +34,8 @@ struct GameState_t
 	Texture_t backgroundTexture;
 	Texture_t pigTexture;
 	
+	Sound_t testSound;
+	
 	v2i testSheetFrame;
 	
 	v2 pigPos;

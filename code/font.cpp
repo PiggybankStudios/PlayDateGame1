@@ -6,24 +6,7 @@ Description:
 	** Functions for Font_t structure (which wraps LCDFont*)
 */
 
-#if 0
-bool IsSameCharBitmap(BitmapData_t char1, BitmapData_t char2)
-{
-	if (char1.size.width != char2.size.width) { return false; }
-	if (char1.size.height != char2.size.height) { return false; }
-	if (char1.rowWidth != char2.rowWidth) { return false; }
-	if (char1.size.width * char1.size.height > 0)
-	{
-		if ((char1.data == nullptr) != (char2.data == nullptr)) { return false; }
-		if ((char1.mask == nullptr) != (char2.mask == nullptr)) { return false; }
-		if (char1.mask != nullptr && MyMemCompare(char1.mask, char2.mask, char1.rowWidth * char1.size.height) != 0) { return false; }
-		if (char1.data != nullptr && MyMemCompare(char1.data, char2.data, char1.rowWidth * char1.size.height) != 0) { return false; }
-	}
-	return true;
-}
-#endif
-
-Font_t LoadFont(MyStr_t path, const char* fontName)
+Font_t LoadFont(MyStr_t path)
 {
 	MemArena_t* scratch = GetScratchArena();
 	const char* loadFontErrorStr = nullptr;
@@ -75,7 +58,7 @@ Font_t LoadFont(MyStr_t path, const char* fontName)
 	}
 	else
 	{
-		PrintLine_E("Couldn't load font %s: %s", MAIN_FONT_PATH, loadFontErrorStr);
+		PrintLine_E("Couldn't load font %s: %s", pathNullTerm.chars, loadFontErrorStr);
 	}
 	
 	FreeScratchArena(scratch);

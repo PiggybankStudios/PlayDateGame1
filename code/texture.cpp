@@ -8,11 +8,12 @@ Description:
 
 Texture_t LoadTexture(MyStr_t path)
 {
-	Assert(IsStrNullTerminated(path)); //TODO: Allocate it somewhere if it's not!
+	MemArena_t* scratch = GetScratchArena();
 	Texture_t result = {};
 	
 	const char* loadBitmapErrorStr = nullptr;
-	result.bitmap = pd->graphics->loadBitmap(path.chars, &loadBitmapErrorStr);
+	MyStr_t pathNullTerm = AllocString(scratch, &path);
+	result.bitmap = pd->graphics->loadBitmap(pathNullTerm.chars, &loadBitmapErrorStr);
 	if (loadBitmapErrorStr == nullptr)
 	{
 		pd->graphics->getBitmapData(
@@ -28,9 +29,10 @@ Texture_t LoadTexture(MyStr_t path)
 	}
 	else
 	{
-		pd->system->error("Failed to load texture from \"%.*s\": %s", path.length, path.chars, loadBitmapErrorStr);
+		pd->system->error("Failed to load texture from \"%s\": %s", pathNullTerm.chars, loadBitmapErrorStr);
 	}
 	
+	FreeScratchArena(scratch);
 	return result;
 }
 

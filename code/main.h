@@ -30,6 +30,7 @@ struct AppState_t
 	MemArena_t scratchArenas[NUM_SCRATCH_ARENAS_PER_THREAD];
 	
 	AppInput_t input;
+	SoundPool_t soundPool;
 	
 	PDMenuItem* fpsDisplayMenuItem;
 	bool fpsDisplayEnabled;
