@@ -33,8 +33,8 @@ struct AppState_t
 	
 	PDMenuItem* fpsDisplayMenuItem;
 	bool fpsDisplayEnabled;
-	PDMenuItem* debugConsoleMenuItem;
-	bool debugConsoleEnabled;
+	PDMenuItem* debugMenuItem;
+	bool debugEnabled;
 	
 	GameState_t* gameStatePntr;
 

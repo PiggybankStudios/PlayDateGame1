@@ -52,6 +52,28 @@ r32 TimeScale = 1.0f;
 #include "game.cpp"
 
 // +--------------------------------------------------------------+
+// |                     Menu Item Callbacks                      |
+// +--------------------------------------------------------------+
+void FpsToggledCallback(void* userData)
+{
+	bool newValue = (pd->system->getMenuItemValue(app->fpsDisplayMenuItem) != 0);
+	if (app->fpsDisplayEnabled != newValue)
+	{
+		app->fpsDisplayEnabled = newValue;
+		PrintLine_I("FPS Display %s", app->fpsDisplayEnabled ? "Enabled" : "Disabled");
+	}
+}
+void DebugToggledCallback(void* userData)
+{
+	bool newValue = (pd->system->getMenuItemValue(app->debugMenuItem) != 0);
+	if (app->debugEnabled != newValue)
+	{
+		app->debugEnabled = newValue;
+		PrintLine_I("Debug %s", app->debugEnabled ? "Enabled" : "Disabled");
+	}
+}
+
+// +--------------------------------------------------------------+
 // |                        Event Handler                         |
 // +--------------------------------------------------------------+
 int MainUpdateCallback(void* userData)
@@ -109,6 +131,14 @@ void HandleSystemEvent(PDSystemEvent event, uint32_t arg)
 			WriteLine_O("+==============================+");
 			PrintLine_O("|       %s v%u.%u(%0u)       |", PROJECT_NAME, VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD);
 			WriteLine_O("+==============================+");
+			
+			app->fpsDisplayMenuItem = pd->system->addCheckmarkMenuItem("FPS", 1, FpsToggledCallback, nullptr);
+			NotNull(app->fpsDisplayMenuItem);
+			pd->system->setMenuItemValue(app->fpsDisplayMenuItem, app->fpsDisplayEnabled ? 1 : 0);
+			
+			app->debugMenuItem = pd->system->addCheckmarkMenuItem("Debug", 1, DebugToggledCallback, nullptr);
+			NotNull(app->debugMenuItem);
+			pd->system->setMenuItemValue(app->debugMenuItem, app->debugEnabled ? 1 : 0);
 			
 			WriteLine_N("Initializing...");
 			input = &app->input;

@@ -9,22 +9,13 @@ Description:
 // +--------------------------------------------------------------+
 // |                           Helpers                            |
 // +--------------------------------------------------------------+
-void FpsToggledCallback(void* userData)
+void BackgroundToggledCallback(void* userData)
 {
-	bool newValue = (pd->system->getMenuItemValue(app->fpsDisplayMenuItem) != 0);
-	if (app->fpsDisplayEnabled != newValue)
+	bool newValue = (pd->system->getMenuItemValue(game->backgroundMenuItem) != 0);
+	if (game->backgroundEnabled != newValue)
 	{
-		app->fpsDisplayEnabled = newValue;
-		PrintLine_I("FPS Display %s", app->fpsDisplayEnabled ? "Enabled" : "Disabled");
-	}
-}
-void DebugConsoleToggledCallback(void* userData)
-{
-	bool newValue = (pd->system->getMenuItemValue(app->debugConsoleMenuItem) != 0);
-	if (app->debugConsoleEnabled != newValue)
-	{
-		app->debugConsoleEnabled = newValue;
-		PrintLine_I("Debug Console %s", app->debugConsoleEnabled ? "Enabled" : "Disabled");
+		game->backgroundEnabled = newValue;
+		PrintLine_I("Background %s", game->backgroundEnabled ? "Enabled" : "Disabled");
 	}
 }
 
@@ -33,17 +24,31 @@ void DebugConsoleToggledCallback(void* userData)
 // +--------------------------------------------------------------+
 void GameInitialize()
 {
+	game->backgroundEnabled = true;
+	game->backgroundMenuItem = pd->system->addCheckmarkMenuItem("Bg", 1, BackgroundToggledCallback, nullptr);
+	NotNull(game->backgroundMenuItem);
+	pd->system->setMenuItemValue(game->backgroundMenuItem, game->backgroundEnabled ? 1 : 0);
+	
 	const char* loadFontErrorStr;
-	game->font = pd->graphics->loadFont(FONT_PATH, &loadFontErrorStr);
-	if (game->font == NULL)
+	
+	game->mainFont = pd->graphics->loadFont(MAIN_FONT_PATH, &loadFontErrorStr);
+	if (game->mainFont == NULL)
 	{
-		PrintLine_E("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, FONT_PATH, loadFontErrorStr);
-		AssertMsg(false, "Couldn't load font!");
+		PrintLine_E("Couldn't load mainFont %s: %s", MAIN_FONT_PATH, loadFontErrorStr);
+		AssertMsg(false, "Couldn't load mainFont!");
+	}
+	
+	game->smallFont = pd->graphics->loadFont(SMALL_FONT_PATH, &loadFontErrorStr);
+	if (game->smallFont == NULL)
+	{
+		PrintLine_E("Couldn't load smallFont %s: %s", SMALL_FONT_PATH, loadFontErrorStr);
+		AssertMsg(false, "Couldn't load smallFont!");
 	}
 	
 	game->testSheet = LoadSpriteSheet(NewStr("Resources/Sheets/test"), 5);
 	Assert(game->testSheet.isValid);
 	PrintLine_D("testSheet: (%d, %d) frames, each %dx%d", game->testSheet.numFramesX, game->testSheet.numFramesY, game->testSheet.frameSize.width, game->testSheet.frameSize.height);
+	game->testSheetFrame = NewVec2i(game->testSheet.numFramesX-1, game->testSheet.numFramesY-1);
 	
 	game->pieSheet = LoadSpriteSheet(NewStr("Resources/Sheets/pie_badge_small"), 6);
 	Assert(game->pieSheet.isValid);
@@ -53,14 +58,6 @@ void GameInitialize()
 	
 	game->pigTexture = LoadTexture(NewStr("Resources/Sprites/pig64"));
 	Assert(game->pigTexture.isValid);
-	
-	app->fpsDisplayMenuItem = pd->system->addCheckmarkMenuItem("FPS", 1, FpsToggledCallback, nullptr);
-	NotNull(app->fpsDisplayMenuItem);
-	pd->system->setMenuItemValue(app->fpsDisplayMenuItem, app->fpsDisplayEnabled ? 1 : 0);
-	
-	app->debugConsoleMenuItem = pd->system->addCheckmarkMenuItem("Debug", 1, DebugConsoleToggledCallback, nullptr);
-	NotNull(app->debugConsoleMenuItem);
-	pd->system->setMenuItemValue(app->debugConsoleMenuItem, app->debugConsoleEnabled ? 1 : 0);
 	
 	game->pigPos.x = (ScreenSize.width - game->pigTexture.width) / 2.0f;
 	game->pigPos.y = (ScreenSize.height - game->pigTexture.height) / 2.0f;
@@ -78,7 +75,7 @@ void GameUpdate()
 	MemArena_t* scratch = GetScratchArena();
 	
 	MyStr_t pigEngineText = NewStr("Pig Engine");
-	v2i pigEngineTextSize = MeasureText(game->font, pigEngineText);
+	v2i pigEngineTextSize = MeasureText(game->mainFont, pigEngineText);
 	v2i totalWidgetSize = NewVec2i(
 		MaxI32(game->pigTexture.width, pigEngineTextSize.width),
 		game->pigTexture.height + pigEngineTextSize.height
@@ -148,17 +145,29 @@ void GameUpdate()
 	// |            Render            |
 	// +==============================+
 	pd->graphics->clear(game->isInverted ? kColorBlack : kColorWhite);
-	pd->graphics->setDrawMode(game->isInverted ? kDrawModeInverted : kDrawModeCopy);
+	LCDBitmapDrawMode defaultDrawMode = (game->isInverted ? kDrawModeInverted : kDrawModeCopy);
+	pd->graphics->setDrawMode(defaultDrawMode);
 	
-	// PdDrawTexturedRec(game->backgroundTexture, NewReci(0, 0, ScreenSize));
+	if (game->backgroundEnabled)
+	{
+		PdDrawTexturedRec(game->backgroundTexture, NewReci(0, 0, ScreenSize));
+	}
 	
-	reci pigIconRec = NewReci(Vec2Roundi(game->pigPos), game->pigTexture.size);
-	v2i pigEngineTextPos = pigIconRec.topLeft + NewVec2i(0, pigIconRec.height);
-	pd->graphics->setFont(game->font);
-	PdDrawText(pigEngineText, pigEngineTextPos);
-	PdDrawTexturedRec(game->pigTexture, pigIconRec);
+	{
+		reci pigIconRec = NewReci(Vec2Roundi(game->pigPos), game->pigTexture.size);
+		v2i pigEngineTextPos = pigIconRec.topLeft + NewVec2i(0, pigIconRec.height);
+		pd->graphics->setDrawMode(kDrawModeNXOR);
+		pd->graphics->setFont(game->mainFont);
+		PdDrawText(pigEngineText, pigEngineTextPos);
+		pd->graphics->setDrawMode(defaultDrawMode);
+		PdDrawTexturedRec(game->pigTexture, pigIconRec);
+	}
 	
-	PdDrawSheetFrame(game->testSheet, game->testSheetFrame, Vec2i_Zero);
+	v2i testFramePos = NewVec2i(
+		ScreenSize.width/2 - game->pieSheet.frameSize.width/2,
+		ScreenSize.height/2 - game->pieSheet.frameSize.height/2
+	);
+	PdDrawSheetFrame(game->testSheet, game->testSheetFrame, testFramePos);
 	
 	if (IsCrankUndocked())
 	{
@@ -169,12 +178,28 @@ void GameUpdate()
 		PdDrawSheetFrame(game->pieSheet, pieFrame, NewReci(ScreenSize.width - pieSize.width, 0, pieSize));
 	}
 	
-	pd->graphics->setDrawMode(kDrawModeNXOR);
-	PdDrawTextPrint(NewVec2i(0, 24*1), "ProgramTime: %u (%u)", ProgramTime, input->realProgramTime);
-	PdDrawTextPrint(NewVec2i(0, 24*2), "ElapsedMs: %u (%u)", input->elapsedMsU32, input->realElapsedMsU32);
-	PdDrawTextPrint(NewVec2i(0, 24*3), "TimeScale: %.2f (%.2f)", TimeScale, input->realTimeScale);
-	PdDrawTextPrint(NewVec2i(0, 24*4), "TimeSinceEpoch: %llu", input->timeSinceEpoch);
-	pd->graphics->setDrawMode(game->isInverted ? kDrawModeInverted : kDrawModeCopy);
+	if (app->debugEnabled)
+	{
+		pd->graphics->setDrawMode(kDrawModeNXOR);
+		
+		v2i textPos = NewVec2i(0, 0);
+		pd->graphics->setFont(game->smallFont);
+		i32 fontHeight = pd->graphics->getFontHeight(game->smallFont);
+		
+		PdDrawTextPrint(textPos, "ProgramTime: %u (%u)", ProgramTime, input->realProgramTime);
+		textPos.y += fontHeight;
+		
+		PdDrawTextPrint(textPos, "ElapsedMs: %u (%u)", input->elapsedMsU32, input->realElapsedMsU32);
+		textPos.y += fontHeight;
+		
+		PdDrawTextPrint(textPos, "TimeScale: %.2f (%.2f)", TimeScale, input->realTimeScale);
+		textPos.y += fontHeight;
+		
+		PdDrawTextPrint(textPos, "TimeSinceEpoch: %llu", input->timeSinceEpoch);
+		textPos.y += fontHeight;
+		
+		pd->graphics->setDrawMode(defaultDrawMode);
+	}
 	
 	if (app->fpsDisplayEnabled)
 	{
