@@ -182,7 +182,7 @@ void GameUpdate()
 	{
 		pd->graphics->setDrawMode(kDrawModeNXOR);
 		
-		v2i textPos = NewVec2i(0, 0);
+		v2i textPos = NewVec2i(1, 1);
 		pd->graphics->setFont(game->smallFont);
 		i32 fontHeight = pd->graphics->getFontHeight(game->smallFont);
 		

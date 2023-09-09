@@ -8,7 +8,8 @@ Date:   09\08\2023
 #define _GAME_H
 
 #define MAIN_FONT_PATH "/System/Fonts/Asheville-Sans-14-Bold.pft"
-#define SMALL_FONT_PATH "/System/Fonts/Roobert-10-Bold.pft"
+// #define SMALL_FONT_PATH "/System/Fonts/Roobert-10-Bold.pft"
+#define SMALL_FONT_PATH "Resources/Fonts/pixel8"
 
 // #define TEXT_WIDTH 112
 // #define TEXT_HEIGHT 16

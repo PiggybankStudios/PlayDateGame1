@@ -1,7 +1,5 @@
 
 # TODO List:
-	[ ] Which fonts are pre-installed?
-	[ ] Custom font
 	[ ] FPS graph?
 	[ ] Debug input? and Debug Commands
 	[ ] Debug Console (overlay?)
@@ -17,6 +15,7 @@
 	[ ] "https://sdk.play.date/2.0.3/Inside%20Playdate%20with%20C.html#_how_to_use_the_c_api"
 	[ ] Download AArch32 bare-metal target (arm-non-eabi) "https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads"
 	[ ] Pulp "https://play.date/pulp/"
+	[ ] Caps (Font Import Tool) "https://play.date/caps/"
 
 # PlayDate Specs:
 	[ ] "https://help.play.date/hardware/the-specs/"
@@ -265,6 +264,8 @@
 #
 
 # Completed TODO List Items
+[X] Custom font
+[X] Which fonts are pre-installed?
 [X] Timing information, LocalTime, ProgramTime, TimeScale
 [X] Scratch arenas?
 [X] Sprite Sheets?
