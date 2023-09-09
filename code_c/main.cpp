@@ -18,6 +18,7 @@ Description:
 // |                         Header Files                         |
 // +--------------------------------------------------------------+
 #include "texture.h"
+#include "sprite_sheet.h"
 #include "input.h"
 #include "pd_api_ext.h"
 #include "game.h"
@@ -41,6 +42,7 @@ const v2 ScreenSizef = { (r32)LCD_COLUMNS, (r32)LCD_ROWS };
 // +--------------------------------------------------------------+
 #include "debug.cpp"
 #include "texture.cpp"
+#include "sprite_sheet.cpp"
 #include "input.cpp"
 #include "game.cpp"
 

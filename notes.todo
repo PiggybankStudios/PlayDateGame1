@@ -1,7 +1,6 @@
 
 # TODO List:
-	[ ] Render images
-	[ ] String measure using font?
+	[ ] Scratch arenas?
 	[ ] Which fonts are pre-installed?
 	[ ] Custom font
 	[ ] Timing information, LocalTime, ProgramTime, TimeScale
@@ -268,4 +267,7 @@
 #
 
 # Completed TODO List Items
+[X] Sprite Sheets?
+[X] String measure using font?
+[X] Render images
 [X] Crank and Accelerometer Input data

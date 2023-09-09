@@ -41,6 +41,10 @@ void GameInitialize()
 		AssertMsg(false, "Couldn't load font!");
 	}
 	
+	game->testSheet = LoadSpriteSheet(NewStr("Resources/Sheets/test"), 5);
+	Assert(game->testSheet.isValid);
+	PrintLine_D("testSheet: (%d, %d) frames, each %dx%d", game->testSheet.numFramesX, game->testSheet.numFramesY, game->testSheet.frameSize.width, game->testSheet.frameSize.height);
+	
 	game->pigTexture = LoadTexture(NewStr("Resources/Sprites/pig64"));
 	Assert(game->pigTexture.isValid);
 	
@@ -76,6 +80,16 @@ void GameUpdate()
 	{
 		HandleBtnExtended(Btn_A);
 		game->isInverted = !game->isInverted;
+		game->testSheetFrame.x++;
+		if (game->testSheetFrame.x >= game->testSheet.numFramesX)
+		{
+			game->testSheetFrame.x = 0;
+			game->testSheetFrame.y++;
+			if (game->testSheetFrame.y >= game->testSheet.numFramesY)
+			{
+				game->testSheetFrame.y = 0;
+			}
+		}
 	}
 	if (BtnPressed(Btn_B))
 	{
@@ -119,6 +133,11 @@ void GameUpdate()
 	pd->graphics->setFont(game->font);
 	PdDrawText(pigEngineText, pigEngineTextPos);
 	PdDrawTexturedRec(game->pigTexture, pigIconRec);
+	
+	// r32 crankPercent = input->crankAngleRadians / TwoPi32;
+	// v2i pie
+	
+	PdDrawSheetFrame(game->testSheet, game->testSheetFrame, Vec2i_Zero);
 	
 	if (app->fpsDisplayEnabled)
 	{

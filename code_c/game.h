@@ -19,6 +19,8 @@ struct GameState_t
 	bool initialized;
 	
 	LCDFont* font;
+	v2i testSheetFrame;
+	SpriteSheet_t testSheet;
 	
 	Texture_t pigTexture;
 	v2i pigPos;

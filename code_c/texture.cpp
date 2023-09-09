@@ -15,21 +15,21 @@ Texture_t LoadTexture(MyStr_t path)
 	result.bitmap = pd->graphics->loadBitmap(path.chars, &loadBitmapErrorStr);
 	if (loadBitmapErrorStr == nullptr)
 	{
+		pd->graphics->getBitmapData(
+			result.bitmap,
+			&result.width,
+			&result.height,
+			nullptr, //rowbytes
+			nullptr, //mask
+			nullptr //data
+		);
+		
 		result.isValid = true;
 	}
 	else
 	{
-		PrintLine_E("Failed to load texture from \"%.*s\": %s", path.length, path.chars, loadBitmapErrorStr);
+		pd->system->error("Failed to load texture from \"%.*s\": %s", path.length, path.chars, loadBitmapErrorStr);
 	}
-	
-	pd->graphics->getBitmapData(
-		result.bitmap,
-		&result.width,
-		&result.height,
-		nullptr, //rowbytes
-		nullptr, //mask
-		nullptr //data
-	);
 	
 	return result;
 }

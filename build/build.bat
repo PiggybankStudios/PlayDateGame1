@@ -64,12 +64,12 @@ rem /Fd = Sets the obj .pdb file name
 rem /Fp = Specifies a precompiled header file name TODO: Do we need this?
 set CompilerFlags=%CompilerFlags% /Fd"%OutputObjPdbName%" /Fp"%ProjectNameSafe%.pch"
 rem /errorReport:prompt = Deprecated. Windows Error Reporting (WER) settings control error reporting TODO: Do we need this?
-rem /diagnostics:column =  Diagnostics format: prints column information. TODO: Do we need this?
+rem /diagnostics:column =  Diagnostics format: prints column information. TODO: Do we need this? (Optional)
 rem /Zc:forScope = Enforce Standard C++ for scoping rules (on by default)
 rem /Zc:inline = Remove unreferenced functions or data if they're COMDAT or have internal linkage only (off by default)
 rem /Zc:wchar_t = wchar_t is a native type, not a typedef (on by default)
 rem /fp:precise = "precise" floating-point model; results are predictable
-set CompilerFlags=%CompilerFlags% /errorReport:prompt /diagnostics:column /Zc:forScope /Zc:inline /Zc:wchar_t /fp:precise
+set CompilerFlags=%CompilerFlags% /errorReport:prompt /Zc:forScope /Zc:inline /Zc:wchar_t /fp:precise
 set IncludeDirectories=/I"%SourceDirectory%" /I"%LibDirectory%\include" /I"%PlaydateSdkDirectory%\C_API"
 set LinkerFlags=/MANIFEST /NXCOMPAT /DYNAMICBASE /DEBUG /DLL /MACHINE:X64 /INCREMENTAL /SUBSYSTEM:CONSOLE /ERRORREPORT:PROMPT /NOLOGO /TLBID:1
 set LinkerFlags=%LinkerFlags% /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /ManifestFile:"%OutputDllName%.intermediate.manifest" /LTCGOUT:"%ProjectNameSafe%.iobj" /ILK:"%ProjectNameSafe%.ilk"

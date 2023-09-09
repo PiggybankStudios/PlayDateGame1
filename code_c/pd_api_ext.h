@@ -31,8 +31,21 @@ const char* GetPDSystemEventStr(PDSystemEvent event)
 }
 
 // +--------------------------------------------------------------+
-// |                             Font                             |
+// |                          Functions                           |
 // +--------------------------------------------------------------+
+v2i GetBitmapSize(LCDBitmap* bitmap)
+{
+	v2i result = Vec2i_Zero;
+	pd->graphics->getBitmapData(
+		bitmap,
+		&result.width,
+		&result.height,
+		nullptr, //rowbytes
+		nullptr, //mask
+		nullptr //data
+	);
+	return result;
+}
 v2i MeasureText(LCDFont* font, MyStr_t text, i32 tracking = 0)
 {
 	v2i result;
@@ -49,16 +62,35 @@ void PdDrawText(MyStr_t text, v2i position)
 	pd->graphics->drawText(text.chars, text.length, kUTF8Encoding, position.x, position.y);
 }
 
-void PdDrawTexturedRec(Texture_t texture, reci drawRec)
+void PdDrawTexturedRec(LCDBitmap* bitmap, v2i bitmapSize, reci drawRec)
 {
+	NotNull(bitmap);
 	pd->graphics->drawRotatedBitmap(
-		texture.bitmap,
+		bitmap,
 		drawRec.x, drawRec.y,
 		0.0f, //rotation
 		0.0f, 0.0f, //centerx/y
-		(r32)drawRec.width / (r32)texture.width, //scalex
-		(r32)drawRec.height / (r32)texture.height //scaley
+		(r32)drawRec.width / (r32)bitmapSize.width, //scalex
+		(r32)drawRec.height / (r32)bitmapSize.height //scaley
 	);
+}
+void PdDrawTexturedRec(Texture_t texture, reci drawRec)
+{
+	PdDrawTexturedRec(texture.bitmap, texture.size, drawRec);
+}
+
+void PdDrawSheetFrame(SpriteSheet_t sheet, v2i frame, reci drawRec)
+{
+	i32 frameIndex = (frame.y * sheet.numFramesX) + frame.x;
+	LCDBitmap* frameBitmap = pd->graphics->getTableBitmap(sheet.table, frameIndex);
+	if (frameBitmap != nullptr)
+	{
+		PdDrawTexturedRec(frameBitmap, sheet.frameSize, drawRec);
+	}
+}
+void PdDrawSheetFrame(SpriteSheet_t sheet, v2i frame, v2i position)
+{
+	PdDrawSheetFrame(sheet, frame, NewReci(position, sheet.frameSize));
 }
 
 #endif //  _PD_API_EXT_H
