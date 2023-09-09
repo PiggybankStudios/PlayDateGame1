@@ -3,3 +3,4 @@ A simple test game for the Play Date designed to be similar to [Pig Engine](http
 
 ## Screenshot
 ![Gif1](/release/screenshots/recording1.gif)
+![Screenshot1](/release/screenshots/screenshot1.png)
