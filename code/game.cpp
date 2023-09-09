@@ -138,8 +138,7 @@ void GameUpdate()
 	// |            Render            |
 	// +==============================+
 	pd->graphics->clear(game->isInverted ? kColorBlack : kColorWhite);
-	LCDBitmapDrawMode defaultDrawMode = (game->isInverted ? kDrawModeInverted : kDrawModeCopy);
-	pd->graphics->setDrawMode(defaultDrawMode);
+	PdSetDrawMode(game->isInverted ? kDrawModeInverted : kDrawModeCopy);
 	
 	if (game->backgroundEnabled)
 	{
@@ -149,10 +148,10 @@ void GameUpdate()
 	{
 		reci pigIconRec = NewReci(Vec2Roundi(game->pigPos), game->pigTexture.size);
 		v2i pigEngineTextPos = pigIconRec.topLeft + NewVec2i(0, pigIconRec.height);
-		pd->graphics->setDrawMode(kDrawModeNXOR);
-		pd->graphics->setFont(game->mainFont.font);
+		LCDBitmapDrawMode oldDrawMode = PdSetDrawMode(kDrawModeNXOR);
+		PdBindFont(&game->mainFont);
 		PdDrawText(pigEngineText, pigEngineTextPos);
-		pd->graphics->setDrawMode(defaultDrawMode);
+		pd->graphics->setDrawMode(oldDrawMode);
 		PdDrawTexturedRec(game->pigTexture, pigIconRec);
 	}
 	
@@ -173,10 +172,11 @@ void GameUpdate()
 	
 	if (app->debugEnabled)
 	{
-		pd->graphics->setDrawMode(kDrawModeNXOR);
+		LCDBitmapDrawMode oldDrawMode = PdSetDrawMode(kDrawModeNXOR);
 		
 		v2i textPos = NewVec2i(1, 1);
-		pd->graphics->setFont(game->debugFont.font);
+		if (app->perfGraph.enabled) { textPos.y += app->perfGraph.mainRec.y + app->perfGraph.mainRec.height + 1; }
+		PdBindFont(&game->debugFont);
 		i32 stepY = game->debugFont.lineHeight + 1;
 		
 		// PdDrawTextPrint(textPos, "ProgramTime: %u (%u)", ProgramTime, input->realProgramTime);
@@ -233,12 +233,7 @@ void GameUpdate()
 			}
 		}
 		
-		pd->graphics->setDrawMode(defaultDrawMode);
-	}
-	
-	if (app->fpsDisplayEnabled)
-	{
-		pd->system->drawFPS(0,0);
+		PdSetDrawMode(oldDrawMode);
 	}
 	
 	FreeScratchArena(scratch);

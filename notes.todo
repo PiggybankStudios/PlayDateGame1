@@ -1,6 +1,5 @@
 
 # TODO List:
-	[ ] FPS graph?
 	[ ] Debug input? and Debug Commands
 	[ ] Debug Console (overlay?)
 	[ ] File System Wrappers
@@ -8,6 +7,9 @@
 	[ ] Sound Effects
 	[ ] Music manager
 	[ ] Support for pausing, stepping frame by frame, scaling time, etc.
+	[ ] AppState_t
+	[ ] Debug menu with infinite checkboxes (one menu item to pop it up)
+	[ ] Settings menu
 
 # Notes during Setup
 	[ ] "https://help.play.date/hardware/get-started/"
@@ -20,12 +22,12 @@
 
 # PlayDate Specs:
 	[ ] "https://help.play.date/hardware/the-specs/"
-	[ ] Display: 400x240 (2.7-inch diagonal)
+	[ ] Display:      400x240 (2.7-inch diagonal)
 	[ ] Memory (RAM): 16 MB
-	[ ] Storage: 4 GB (Flash)
-	[ ] CPU: 168MHz Cortex M7
-	[ ] Total Size: 76mm x 74mm x 9mm
-	[ ] Cost: $199
+	[ ] Storage:      4 GB (Flash)
+	[ ] CPU:          168MHz Cortex M7
+	[ ] Total Size:   76mm x 74mm x 9mm
+	[ ] Cost:         $199
 
 # Simulator Keyboard Shortcuts
 	[ ] Restart              Cmd/Ctrl-R
@@ -265,6 +267,7 @@
 #
 
 # Completed TODO List Items
+[X] FPS graph?
 [X] Font_t structure
 [X] Custom font
 [X] Which fonts are pre-installed?

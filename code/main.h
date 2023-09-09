@@ -37,6 +37,8 @@ struct AppState_t
 	bool debugEnabled;
 	
 	GameState_t* gameStatePntr;
+	
+	PerfGraph_t perfGraph;
 
 };
 

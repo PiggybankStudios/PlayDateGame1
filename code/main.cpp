@@ -24,6 +24,7 @@ Description:
 #include "font.h"
 #include "input.h"
 #include "pd_api_ext.h"
+#include "perf_graph.h"
 #include "game.h"
 #include "main.h"
 
@@ -52,6 +53,7 @@ r32 TimeScale = 1.0f;
 #include "sprite_sheet.cpp"
 #include "font.cpp"
 #include "input.cpp"
+#include "perf_graph.cpp"
 #include "game.cpp"
 
 // +--------------------------------------------------------------+
@@ -64,6 +66,7 @@ void FpsToggledCallback(void* userData)
 	{
 		app->fpsDisplayEnabled = newValue;
 		PrintLine_I("FPS Display %s", app->fpsDisplayEnabled ? "Enabled" : "Disabled");
+		app->perfGraph.enabled = app->fpsDisplayEnabled; //TODO: Make this a seperate option
 	}
 }
 void DebugToggledCallback(void* userData)
@@ -81,7 +84,9 @@ void DebugToggledCallback(void* userData)
 // +--------------------------------------------------------------+
 int MainUpdateCallback(void* userData)
 {
+	PdBeginFrame();
 	UpdateAppInput();
+	UpdatePerfGraph(&app->perfGraph);
 	
 	if (!app->firstUpdateCalled)
 	{
@@ -91,6 +96,8 @@ int MainUpdateCallback(void* userData)
 	}
 	
 	GameUpdate();
+	
+	RenderPerfGraph(&app->perfGraph);
 	
 	return 0;
 }
@@ -146,6 +153,7 @@ void HandleSystemEvent(PDSystemEvent event, uint32_t arg)
 			WriteLine_N("Initializing...");
 			input = &app->input;
 			InitializeAppInput();
+			InitPerfGraph(&app->perfGraph);
 			
 			GameInitialize();
 			
