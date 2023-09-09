@@ -29,6 +29,16 @@ const char* GetPDSystemEventStr(PDSystemEvent event)
 		default: return "Unknown";
 	}
 }
+const char* GetPDLanguageStr(PDLanguage language)
+{
+	switch (language)
+	{
+		case kPDLanguageEnglish:  return "kPDLanguageEnglish";
+		case kPDLanguageJapanese: return "kPDLanguageJapanese";
+		case kPDLanguageUnknown:  return "kPDLanguageUnknown";
+		default: return "Unknown";
+	}
+}
 
 // +--------------------------------------------------------------+
 // |                          Functions                           |
@@ -60,6 +70,14 @@ v2i MeasureText(LCDFont* font, MyStr_t text, i32 tracking = 0)
 void PdDrawText(MyStr_t text, v2i position)
 {
 	pd->graphics->drawText(text.chars, text.length, kUTF8Encoding, position.x, position.y);
+}
+void PdDrawTextPrint(v2i position, const char* formatString, ...)
+{
+	MemArena_t* scratch = GetScratchArena();
+	PrintInArenaVa(scratch, printedText, printedLength, formatString);
+	//TODO: Add error checking!
+	PdDrawText(NewStr(printedLength, printedText), position);
+	FreeScratchArena(scratch);
 }
 
 void PdDrawTexturedRec(LCDBitmap* bitmap, v2i bitmapSize, reci drawRec)

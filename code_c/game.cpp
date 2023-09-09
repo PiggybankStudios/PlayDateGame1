@@ -45,6 +45,12 @@ void GameInitialize()
 	Assert(game->testSheet.isValid);
 	PrintLine_D("testSheet: (%d, %d) frames, each %dx%d", game->testSheet.numFramesX, game->testSheet.numFramesY, game->testSheet.frameSize.width, game->testSheet.frameSize.height);
 	
+	game->pieSheet = LoadSpriteSheet(NewStr("Resources/Sheets/pie_badge_small"), 6);
+	Assert(game->pieSheet.isValid);
+	
+	game->backgroundTexture = LoadTexture(NewStr("Resources/Textures/background"));
+	Assert(game->backgroundTexture.isValid);
+	
 	game->pigTexture = LoadTexture(NewStr("Resources/Sprites/pig64"));
 	Assert(game->pigTexture.isValid);
 	
@@ -56,8 +62,8 @@ void GameInitialize()
 	NotNull(app->debugConsoleMenuItem);
 	pd->system->setMenuItemValue(app->debugConsoleMenuItem, app->debugConsoleEnabled ? 1 : 0);
 	
-	game->pigPos.x = (400 - game->pigTexture.width) / 2;
-	game->pigPos.y = (240 - game->pigTexture.height) / 2;
+	game->pigPos.x = (ScreenSize.width - game->pigTexture.width) / 2.0f;
+	game->pigPos.y = (ScreenSize.height - game->pigTexture.height) / 2.0f;
 	game->pigVel.x = 1;
 	game->pigVel.y = 2;
 	
@@ -69,6 +75,8 @@ void GameInitialize()
 // +--------------------------------------------------------------+
 void GameUpdate()
 {
+	MemArena_t* scratch = GetScratchArena();
+	
 	MyStr_t pigEngineText = NewStr("Pig Engine");
 	v2i pigEngineTextSize = MeasureText(game->font, pigEngineText);
 	v2i totalWidgetSize = NewVec2i(
@@ -94,8 +102,8 @@ void GameUpdate()
 	if (BtnPressed(Btn_B))
 	{
 		HandleBtnExtended(Btn_B);
-		game->pigVel.x += SignOfI32(game->pigVel.x);
-		game->pigVel.y += SignOfI32(game->pigVel.y);
+		game->pigVel.x += SignOfR32(game->pigVel.x);
+		game->pigVel.y += SignOfR32(game->pigVel.y);
 	}
 	
 	if (!IsCrankDocked())
@@ -103,24 +111,38 @@ void GameUpdate()
 		if (!game->followingCrank)
 		{
 			game->pigOldVel = game->pigVel;
-			pd->system->setPeripheralsEnabled(kAccelerometer);
 			game->followingCrank = true;
 		}
-		// game->pigVel = Vec2Roundi(Vec2FromAngle(input->crankAngleRadians + ThreeHalfsPi32, 3));
-		game->pigVel.x += RoundR32i(input->accelVec.x);
-		game->pigVel.y += RoundR32i(input->accelVec.y);
+		game->pigVel = Vec2FromAngle(input->crankAngleRadians + ThreeHalfsPi32, 3);
 	}
 	else if (game->followingCrank)
 	{
 		game->pigVel = game->pigOldVel;
-		pd->system->setPeripheralsEnabled(kNone);
 		game->followingCrank = false;
 	}
 	
-	game->pigPos += game->pigVel;
+	game->pigPos += game->pigVel * TimeScale;
 	
-	if (game->pigPos.x < 0 || game->pigPos.x > ScreenSize.width  - totalWidgetSize.width)  { game->pigVel.x = -game->pigVel.x; }
-	if (game->pigPos.y < 0 || game->pigPos.y > ScreenSize.height - totalWidgetSize.height) { game->pigVel.y = -game->pigVel.y; }
+	if (game->pigPos.x < 0)
+	{
+		game->pigPos.x = 0;
+		game->pigVel.x = AbsR32(game->pigVel.x);
+	}
+	if (game->pigPos.x > ScreenSize.width - totalWidgetSize.width)
+	{
+		game->pigPos.x = (r32)(ScreenSize.width - totalWidgetSize.width);
+		game->pigVel.x = -AbsR32(game->pigVel.x);
+	}
+	if (game->pigPos.y < 0)
+	{
+		game->pigPos.y = 0;
+		game->pigVel.y = AbsR32(game->pigVel.y);
+	}
+	if (game->pigPos.y > ScreenSize.height - totalWidgetSize.height)
+	{
+		game->pigPos.y = (r32)(ScreenSize.height - totalWidgetSize.height);
+		game->pigVel.y = -AbsR32(game->pigVel.y);
+	}
 	
 	// +==============================+
 	// |            Render            |
@@ -128,19 +150,36 @@ void GameUpdate()
 	pd->graphics->clear(game->isInverted ? kColorBlack : kColorWhite);
 	pd->graphics->setDrawMode(game->isInverted ? kDrawModeInverted : kDrawModeCopy);
 	
-	reci pigIconRec = NewReci(game->pigPos, game->pigTexture.size);
+	// PdDrawTexturedRec(game->backgroundTexture, NewReci(0, 0, ScreenSize));
+	
+	reci pigIconRec = NewReci(Vec2Roundi(game->pigPos), game->pigTexture.size);
 	v2i pigEngineTextPos = pigIconRec.topLeft + NewVec2i(0, pigIconRec.height);
 	pd->graphics->setFont(game->font);
 	PdDrawText(pigEngineText, pigEngineTextPos);
 	PdDrawTexturedRec(game->pigTexture, pigIconRec);
 	
-	// r32 crankPercent = input->crankAngleRadians / TwoPi32;
-	// v2i pie
-	
 	PdDrawSheetFrame(game->testSheet, game->testSheetFrame, Vec2i_Zero);
+	
+	if (IsCrankUndocked())
+	{
+		r32 crankPercent = input->crankAngleRadians / TwoPi32;
+		i32 pieFrameIndex = RoundR32i(24 * (1.0f - crankPercent));
+		v2i pieFrame = NewVec2i(pieFrameIndex % game->pieSheet.numFramesX, pieFrameIndex / game->pieSheet.numFramesX);
+		v2i pieSize = game->pieSheet.frameSize * 3;
+		PdDrawSheetFrame(game->pieSheet, pieFrame, NewReci(ScreenSize.width - pieSize.width, 0, pieSize));
+	}
+	
+	pd->graphics->setDrawMode(kDrawModeNXOR);
+	PdDrawTextPrint(NewVec2i(0, 24*1), "ProgramTime: %u (%u)", ProgramTime, input->realProgramTime);
+	PdDrawTextPrint(NewVec2i(0, 24*2), "ElapsedMs: %u (%u)", input->elapsedMsU32, input->realElapsedMsU32);
+	PdDrawTextPrint(NewVec2i(0, 24*3), "TimeScale: %.2f (%.2f)", TimeScale, input->realTimeScale);
+	PdDrawTextPrint(NewVec2i(0, 24*4), "TimeSinceEpoch: %llu", input->timeSinceEpoch);
+	pd->graphics->setDrawMode(game->isInverted ? kDrawModeInverted : kDrawModeCopy);
 	
 	if (app->fpsDisplayEnabled)
 	{
 		pd->system->drawFPS(0,0);
 	}
+	
+	FreeScratchArena(scratch);
 }

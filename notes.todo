@@ -1,9 +1,7 @@
 
 # TODO List:
-	[ ] Scratch arenas?
 	[ ] Which fonts are pre-installed?
 	[ ] Custom font
-	[ ] Timing information, LocalTime, ProgramTime, TimeScale
 	[ ] FPS graph?
 	[ ] Debug input? and Debug Commands
 	[ ] Debug Console (overlay?)
@@ -11,7 +9,7 @@
 	[ ] SaveGame system
 	[ ] Sound Effects
 	[ ] Music manager
-	[ ] 
+	[ ] Support for pausing, stepping frame by frame, scaling time, etc.
 
 # Notes during Setup
 	[ ] "https://help.play.date/hardware/get-started/"
@@ -267,6 +265,8 @@
 #
 
 # Completed TODO List Items
+[X] Timing information, LocalTime, ProgramTime, TimeScale
+[X] Scratch arenas?
 [X] Sprite Sheets?
 [X] String measure using font?
 [X] Render images

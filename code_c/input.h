@@ -82,6 +82,25 @@ struct BtnState_t
 };
 struct AppInput_t
 {
+	PDLanguage language;
+	bool languageChanged;
+	
+	u32 programTime;
+	u32 programTimePrev;
+	u32 elapsedMsU32;
+	r32 elapsedMs;
+	r32 timeScale;
+	
+	u32 timeSinceEpochSecs;
+	u32 timeSinceEpochMs;
+	u64 timeSinceEpoch; //total ms
+	
+	u32 realProgramTime;
+	u32 realProgramTimePrev;
+	u32 realElapsedMsU32;
+	r32 realElapsedMs;
+	r32 realTimeScale;
+	
 	r32 crankAngle;
 	r32 crankAnglePrev;
 	r32 crankDelta;

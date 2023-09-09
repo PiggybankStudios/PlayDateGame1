@@ -19,15 +19,20 @@ struct GameState_t
 	bool initialized;
 	
 	LCDFont* font;
-	v2i testSheetFrame;
-	SpriteSheet_t testSheet;
 	
+	SpriteSheet_t testSheet;
+	SpriteSheet_t pieSheet;
+	
+	Texture_t backgroundTexture;
 	Texture_t pigTexture;
-	v2i pigPos;
-	v2i pigVel;
+	
+	v2i testSheetFrame;
+	
+	v2 pigPos;
+	v2 pigVel;
 	
 	bool followingCrank;
-	v2i pigOldVel;
+	v2 pigOldVel;
 	
 	bool isInverted;
 };

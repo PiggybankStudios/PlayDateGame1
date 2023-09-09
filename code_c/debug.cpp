@@ -7,9 +7,6 @@ Date:   09\08\2023
 #ifndef _DEBUG_H
 #define _DEBUG_H
 
-#define GLOBAL_PRINT_BUFFER_SIZE 1024
-char* GlobalPrintBuffer = nullptr;
-
 #define DEBUG_OUTPUT_ENABLED   1
 #define REGULAR_OUTPUT_ENABLED 1
 #define INFO_OUTPUT_ENABLED    1
@@ -30,30 +27,20 @@ enum DbgFlags_t
 	// DbgFlag_Unused        = 0x80,
 };
 
-void AppInitDebugOutput()
-{
-	NotNull(fixedHeap);
-	GlobalPrintBuffer = AllocArray(fixedHeap, char, GLOBAL_PRINT_BUFFER_SIZE);
-	NotNull(GlobalPrintBuffer);
-}
-
 // +--------------------------------------------------------------+
 // |                 Main Debug Output Functions                  |
 // +--------------------------------------------------------------+
 void AppDebugOutput(u8 flags, const char* filePath, u32 lineNumber, const char* funcName, DbgLevel_t level, bool newLine, const char* message)
 {
-	//TODO: Can we somehow log without doing a new-line?
 	pd->system->logToConsole(message);
 }
 void AppDebugPrint(u8 flags, const char* filePath, u32 lineNumber, const char* funcName, DbgLevel_t level, bool newLine, const char* formatString, ...)
 {
-	va_list args;
-	va_start(args, formatString);
-	int printResult = MyVaListPrintf(GlobalPrintBuffer, GLOBAL_PRINT_BUFFER_SIZE, formatString, args);
-	va_end(args);
+	MemArena_t* scratch = GetScratchArena();
+	PrintInArenaVa(scratch, printedStr, printedLength, formatString);
 	//TODO: Add error checking!
-	GlobalPrintBuffer[GLOBAL_PRINT_BUFFER_SIZE-1] = '\0';
-	AppDebugOutput(flags, filePath, lineNumber, funcName, level, newLine, &GlobalPrintBuffer[0]);
+	AppDebugOutput(flags, filePath, lineNumber, funcName, level, newLine, printedStr);
+	FreeScratchArena(scratch);
 }
 
 // +--------------------------------------------------------------+
@@ -73,13 +60,11 @@ GYLIB_DEBUG_OUTPUT_HANDLER_DEF(GyLibOutputHandler)
 // void GyLibPrintHandler(const char* filePath, u32 lineNumber, const char* funcName, DbgLevel_t level, bool newLine, const char* formatString, ...)
 GYLIB_DEBUG_PRINT_HANDLER_DEF(GyLibPrintHandler)
 {
-	va_list args;
-	va_start(args, formatString);
-	int printResult = MyVaListPrintf(GlobalPrintBuffer, GLOBAL_PRINT_BUFFER_SIZE, formatString, args);
-	va_end(args);
+	MemArena_t* scratch = GetScratchArena();
+	PrintInArenaVa(scratch, printedStr, printedLength, formatString);
 	//TODO: Add error checking!
-	GlobalPrintBuffer[GLOBAL_PRINT_BUFFER_SIZE-1] = '\0';
-	if (app != nullptr) { GyLibOutputHandler(filePath, lineNumber, funcName, level, newLine, &GlobalPrintBuffer[0]); }
+	if (app != nullptr) { GyLibOutputHandler(filePath, lineNumber, funcName, level, newLine, printedStr); }
+	FreeScratchArena(scratch);
 }
 
 // +--------------------------------------------------------------+

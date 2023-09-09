@@ -11,6 +11,7 @@ Description:
 #include "gylib/gy_defines_check.h"
 
 #define GYLIB_LOOKUP_PRIMES_10
+#define GYLIB_SCRATCH_ARENA_AVAILABLE
 #define GYLIB_USE_ASSERT_FAILURE_FUNC
 #include "gylib/gy.h"
 
@@ -36,10 +37,14 @@ GameState_t* game = nullptr;
 
 const v2i ScreenSize = { LCD_COLUMNS, LCD_ROWS };
 const v2 ScreenSizef = { (r32)LCD_COLUMNS, (r32)LCD_ROWS };
+u32 ProgramTime = 0;
+r32 ElapsedMs = 0.0f;
+r32 TimeScale = 1.0f;
 
 // +--------------------------------------------------------------+
 // |                         Source Files                         |
 // +--------------------------------------------------------------+
+#include "scratch.cpp"
 #include "debug.cpp"
 #include "texture.cpp"
 #include "sprite_sheet.cpp"
@@ -51,13 +56,15 @@ const v2 ScreenSizef = { (r32)LCD_COLUMNS, (r32)LCD_ROWS };
 // +--------------------------------------------------------------+
 int MainUpdateCallback(void* userData)
 {
+	UpdateAppInput();
+	
 	if (!app->firstUpdateCalled)
 	{
 		WriteLine_N("Running...");
+		app->programStartTimeSinceEpoch = input->timeSinceEpoch;
 		app->firstUpdateCalled = true;
 	}
 	
-	UpdateAppInput();
 	GameUpdate();
 	
 	return 0;
@@ -86,17 +93,19 @@ void HandleSystemEvent(PDSystemEvent event, uint32_t arg)
 			NotNull(fixedHeapPntr);
 			InitMemArena_FixedHeap(&newApp->fixedHeap, FIXED_HEAP_SIZE, fixedHeapPntr);
 			InitMemArena_PagedHeapArena(&newApp->mainHeap, MAIN_HEAP_PAGE_SIZE, &newApp->stdHeap, MAIN_HEAP_MAX_NUM_PAGES);
+			newApp->initialized = true;
+			
+			Assert(app == nullptr);
 			fixedHeap = &newApp->fixedHeap;
 			mainHeap = &newApp->mainHeap;
-			newApp->initialized = true;
-			Assert(app == nullptr);
 			app = newApp;
+			
+			InitScratchArenas(&app->stdHeap, SCRATCH_ARENA_SIZE, SCRATCH_ARENA_MAX_NUM_MARKS);
 			
 			app->gameStatePntr = AllocStruct(fixedHeap, GameState_t);
 			NotNull(app->gameStatePntr);
 			game = app->gameStatePntr;
 			
-			AppInitDebugOutput();
 			WriteLine_O("+==============================+");
 			PrintLine_O("|       %s v%u.%u(%0u)       |", PROJECT_NAME, VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD);
 			WriteLine_O("+==============================+");
