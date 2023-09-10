@@ -18,7 +18,9 @@ Date:   09\08\2023
 #define TARGET_FRAME_TIME        (1000.0f / TARGET_FRAMERATE) //ms
 #define TIME_SCALE_SNAP_PERCENT  0.1f
 
-struct AppState_t
+#define DEBUG_FONT_PATH "Resources/Fonts/pixel8"
+
+struct AppGlobalState_t
 {
 	bool initialized;
 	bool firstUpdateCalled;
@@ -29,15 +31,15 @@ struct AppState_t
 	MemArena_t mainHeap;
 	MemArena_t scratchArenas[NUM_SCRATCH_ARENAS_PER_THREAD];
 	
+	AppStateStack_t appStates;
 	AppInput_t input;
 	SoundPool_t soundPool;
+	Font_t debugFont;
 	
 	PDMenuItem* fpsDisplayMenuItem;
 	bool fpsDisplayEnabled;
 	PDMenuItem* debugMenuItem;
 	bool debugEnabled;
-	
-	GameState_t* gameStatePntr;
 	
 	PerfGraph_t perfGraph;
 

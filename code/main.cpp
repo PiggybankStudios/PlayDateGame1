@@ -26,6 +26,8 @@ Description:
 #include "input.h"
 #include "pd_api_ext.h"
 #include "perf_graph.h"
+#include "app_state.h"
+#include "main_menu.h"
 #include "game.h"
 #include "main.h"
 
@@ -33,11 +35,10 @@ Description:
 // |                           Globals                            |
 // +--------------------------------------------------------------+
 PlaydateAPI* pd = nullptr;
-AppState_t* app = nullptr;
+AppGlobalState_t* app = nullptr;
 MemArena_t* fixedHeap = nullptr;
 MemArena_t* mainHeap = nullptr;
 AppInput_t* input = nullptr;
-GameState_t* game = nullptr;
 
 const v2i ScreenSize = { LCD_COLUMNS, LCD_ROWS };
 const v2 ScreenSizef = { (r32)LCD_COLUMNS, (r32)LCD_ROWS };
@@ -56,7 +57,11 @@ r32 TimeScale = 1.0f;
 #include "font.cpp"
 #include "input.cpp"
 #include "perf_graph.cpp"
+
+#include "app_state.cpp"
+#include "main_menu.cpp"
 #include "game.cpp"
+#include "app_state_registry.cpp"
 
 // +--------------------------------------------------------------+
 // |                     Menu Item Callbacks                      |
@@ -98,7 +103,7 @@ int MainUpdateCallback(void* userData)
 		app->firstUpdateCalled = true;
 	}
 	
-	GameUpdate();
+	UpdateAndRenderAppStateStack();
 	
 	RenderPerfGraph(&app->perfGraph);
 	
@@ -119,7 +124,7 @@ void HandleSystemEvent(PDSystemEvent event, uint32_t arg)
 			GyLibDebugOutputFunc = GyLibOutputHandler;
 			GyLibDebugPrintFunc = GyLibPrintHandler;
 			
-			AppState_t* newApp = (AppState_t*)MyMalloc(sizeof(AppState_t));
+			AppGlobalState_t* newApp = (AppGlobalState_t*)MyMalloc(sizeof(AppGlobalState_t));
 			NotNull(newApp);
 			ClearPointer(newApp);
 			newApp->initialized = true;
@@ -137,10 +142,6 @@ void HandleSystemEvent(PDSystemEvent event, uint32_t arg)
 			
 			InitScratchArenas(&app->stdHeap, SCRATCH_ARENA_SIZE, SCRATCH_ARENA_MAX_NUM_MARKS);
 			
-			app->gameStatePntr = AllocStruct(fixedHeap, GameState_t);
-			NotNull(app->gameStatePntr);
-			game = app->gameStatePntr;
-			
 			WriteLine_O("+==============================+");
 			PrintLine_O("|       %s v%u.%u(%0u)       |", PROJECT_NAME, VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD);
 			WriteLine_O("+==============================+");
@@ -153,13 +154,17 @@ void HandleSystemEvent(PDSystemEvent event, uint32_t arg)
 			NotNull(app->debugMenuItem);
 			pd->system->setMenuItemValue(app->debugMenuItem, app->debugEnabled ? 1 : 0);
 			
+			app->debugFont = LoadFont(NewStr(DEBUG_FONT_PATH));
+			Assert(app->debugFont.isValid);
+			
 			WriteLine_N("Initializing...");
 			input = &app->input;
 			InitializeAppInput();
 			InitSoundPool(&app->soundPool);
 			InitPerfGraph(&app->perfGraph);
+			RegisterAllAppStates();
 			
-			GameInitialize();
+			StartFirstAppState();
 			
 			pd->system->setUpdateCallback(MainUpdateCallback, nullptr);
 		} break;

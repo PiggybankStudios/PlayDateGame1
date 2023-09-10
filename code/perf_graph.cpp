@@ -13,6 +13,8 @@ void InitPerfGraph(PerfGraph_t* graph)
 	graph->enabled = false;
 	graph->paused = false;
 	graph->mainRec = NewReci(2, 2, PERF_GRAPH_WIDTH * PERF_TICK_WIDTH, PERF_GRAPH_DISPLAY_HEIGHT);
+	graph->font = LoadFont(NewStr(PERF_GRAPH_FONT_PATH));
+	Assert(graph->font.isValid);
 }
 
 void UpdatePerfGraph(PerfGraph_t* graph)
@@ -56,15 +58,18 @@ void RenderPerfGraph(PerfGraph_t* graph)
 		
 		PdDrawRecOutline(graph->mainRec, 2, true, kColorXOR);
 		
-		PdBindFont(&game->smallFont);
+		PdBindFont(&graph->font);
 		LCDBitmapDrawMode oldDrawMode = PdSetDrawMode(kDrawModeNXOR);
-		v2i textPos = NewVec2i(graph->mainRec.x + graph->mainRec.width + 2, graph->mainRec.y);
+		v2i textPos = NewVec2i(graph->mainRec.x + graph->mainRec.width + 3, graph->mainRec.y);
 		i32 advanceY = boundFont->lineHeight + 1;
 		
 		pd->system->drawFPS(textPos.x, textPos.y);
 		textPos.y += 15;
 		
 		PdDrawTextPrint(textPos, "%dms", RoundR32i(graph->values[0]));
+		textPos.y += advanceY;
+		
+		PdDrawTextPrint(textPos, "%.2f", TimeScale);
 		textPos.y += advanceY;
 		
 		PdSetDrawMode(oldDrawMode);

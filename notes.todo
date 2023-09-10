@@ -1,14 +1,18 @@
 
 # TODO List:
+	[ ] AppState_t
+	[ ] Debug menu with infinite checkboxes (one menu item to pop it up)
 	[ ] Debug input? and Debug Commands
 	[ ] Debug Console (overlay?)
 	[ ] File System Wrappers
 	[ ] SaveGame system
 	[ ] Music manager
 	[ ] Support for pausing, stepping frame by frame, scaling time, etc.
-	[ ] AppState_t
-	[ ] Debug menu with infinite checkboxes (one menu item to pop it up)
+	[ ] Yes/No Dialog
+	[ ] Software Keyboard
 	[ ] Settings menu
+	[ ] Btn Repeat Logic
+	[ ] Togglable Mouse
 
 # Notes during Setup
 	[ ] "https://help.play.date/hardware/get-started/"

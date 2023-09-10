@@ -3,8 +3,10 @@ File:   game.cpp
 Author: Taylor Robbins
 Date:   09\08\2023
 Description: 
-	** Holds the main game logic (aka GameInitialize and GameUpdate)
+	** Holds the game AppState
 */
+
+GameState_t* game = nullptr;
 
 // +--------------------------------------------------------------+
 // |                           Helpers                            |
@@ -20,51 +22,65 @@ void BackgroundToggledCallback(void* userData)
 }
 
 // +--------------------------------------------------------------+
-// |                          Initialize                          |
+// |                            Start                             |
 // +--------------------------------------------------------------+
-void GameInitialize()
+void StartAppState_Game(bool initialize, AppState_t prevState)
 {
-	game->backgroundEnabled = true;
-	game->backgroundMenuItem = pd->system->addCheckmarkMenuItem("Bg", 1, BackgroundToggledCallback, nullptr);
-	NotNull(game->backgroundMenuItem);
-	pd->system->setMenuItemValue(game->backgroundMenuItem, game->backgroundEnabled ? 1 : 0);
-	
-	game->mainFont = LoadFont(NewStr(MAIN_FONT_PATH));
-	Assert(game->mainFont.isValid);
-	game->smallFont = LoadFont(NewStr(SMALL_FONT_PATH));
-	Assert(game->smallFont.isValid);
-	game->debugFont = LoadFont(NewStr(DEBUG_FONT_PATH));
-	Assert(game->debugFont.isValid);
-	game->gameFont = LoadFont(NewStr(GAME_FONT_PATH));
-	Assert(game->gameFont.isValid);
-	
-	game->testSheet = LoadSpriteSheet(NewStr("Resources/Sheets/test"), 5);
-	Assert(game->testSheet.isValid);
-	PrintLine_D("testSheet: (%d, %d) frames, each %dx%d", game->testSheet.numFramesX, game->testSheet.numFramesY, game->testSheet.frameSize.width, game->testSheet.frameSize.height);
-	game->testSheetFrame = NewVec2i(game->testSheet.numFramesX-1, game->testSheet.numFramesY-1);
-	
-	game->pieSheet = LoadSpriteSheet(NewStr("Resources/Sheets/pie_badge_small"), 6);
-	Assert(game->pieSheet.isValid);
-	game->backgroundTexture = LoadTexture(NewStr("Resources/Textures/background"));
-	Assert(game->backgroundTexture.isValid);
-	game->pigTexture = LoadTexture(NewStr("Resources/Sprites/pig64"));
-	Assert(game->pigTexture.isValid);
-	
-	game->testSound = LoadSound(NewStr("Resources/Sounds/test"));
-	Assert(game->testSound.isValid);
-	
-	game->pigPos.x = (ScreenSize.width - game->pigTexture.width) / 2.0f;
-	game->pigPos.y = (ScreenSize.height - game->pigTexture.height) / 2.0f;
-	game->pigVel.x = 1;
-	game->pigVel.y = 2;
-	
-	game->initialized = true;
+	if (initialize)
+	{
+		game->backgroundEnabled = true;
+		game->backgroundMenuItem = pd->system->addCheckmarkMenuItem("Bg", 1, BackgroundToggledCallback, nullptr);
+		NotNull(game->backgroundMenuItem);
+		pd->system->setMenuItemValue(game->backgroundMenuItem, game->backgroundEnabled ? 1 : 0);
+		
+		game->mainFont = LoadFont(NewStr(MAIN_FONT_PATH));
+		Assert(game->mainFont.isValid);
+		game->smallFont = LoadFont(NewStr(SMALL_FONT_PATH));
+		Assert(game->smallFont.isValid);
+		game->gameFont = LoadFont(NewStr(GAME_FONT_PATH));
+		Assert(game->gameFont.isValid);
+		
+		game->testSheet = LoadSpriteSheet(NewStr("Resources/Sheets/test"), 5);
+		Assert(game->testSheet.isValid);
+		PrintLine_D("testSheet: (%d, %d) frames, each %dx%d", game->testSheet.numFramesX, game->testSheet.numFramesY, game->testSheet.frameSize.width, game->testSheet.frameSize.height);
+		game->testSheetFrame = NewVec2i(game->testSheet.numFramesX-1, game->testSheet.numFramesY-1);
+		
+		game->pieSheet = LoadSpriteSheet(NewStr("Resources/Sheets/pie_badge_small"), 6);
+		Assert(game->pieSheet.isValid);
+		game->backgroundTexture = LoadTexture(NewStr("Resources/Textures/background"));
+		Assert(game->backgroundTexture.isValid);
+		game->pigTexture = LoadTexture(NewStr("Resources/Sprites/pig64"));
+		Assert(game->pigTexture.isValid);
+		
+		game->testSound = LoadSound(NewStr("Resources/Sounds/test"));
+		Assert(game->testSound.isValid);
+		
+		game->pigPos.x = (ScreenSize.width - game->pigTexture.width) / 2.0f;
+		game->pigPos.y = (ScreenSize.height - game->pigTexture.height) / 2.0f;
+		game->pigVel.x = 1;
+		game->pigVel.y = 2;
+		
+		game->initialized = true;
+	}
+}
+
+// +--------------------------------------------------------------+
+// |                             Stop                             |
+// +--------------------------------------------------------------+
+void StopAppState_Game(bool deinitialize, AppState_t nextState)
+{
+	if (deinitialize)
+	{
+		pd->system->removeMenuItem(game->backgroundMenuItem);
+		//TODO: Free things!
+		ClearPointer(game);
+	}
 }
 
 // +--------------------------------------------------------------+
 // |                            Update                            |
 // +--------------------------------------------------------------+
-void GameUpdate()
+void UpdateAppState_Game()
 {
 	MemArena_t* scratch = GetScratchArena();
 	
@@ -74,6 +90,17 @@ void GameUpdate()
 		MaxI32(game->pigTexture.width, pigEngineTextSize.width),
 		game->pigTexture.height + pigEngineTextSize.height
 	);
+	
+	if (BtnDownRaw(Btn_B))
+	{
+		game->holdBTime += ElapsedMs;
+		if (game->holdBTime >= GAME_RETURN_TO_MENU_HOLD_B_TIME)
+		{
+			PopAppState();
+			game->holdBTime = 0.0f;
+		}
+	}
+	else { game->holdBTime = 0.0f; }
 	
 	if (BtnPressed(Btn_A))
 	{
@@ -137,9 +164,16 @@ void GameUpdate()
 		game->pigVel.y = -AbsR32(game->pigVel.y);
 	}
 	
-	// +==============================+
-	// |            Render            |
-	// +==============================+
+	FreeScratchArena(scratch);
+}
+
+// +--------------------------------------------------------------+
+// |                            Render                            |
+// +--------------------------------------------------------------+
+void RenderAppState_Game(bool isOnTop)
+{
+	MemArena_t* scratch = GetScratchArena();
+	
 	pd->graphics->clear(game->isInverted ? kColorBlack : kColorWhite);
 	PdSetDrawMode(game->isInverted ? kDrawModeInverted : kDrawModeCopy);
 	
@@ -149,6 +183,7 @@ void GameUpdate()
 	}
 	
 	{
+		MyStr_t pigEngineText = NewStr("Pig Engine");
 		reci pigIconRec = NewReci(Vec2Roundi(game->pigPos), game->pigTexture.size);
 		v2i pigEngineTextPos = pigIconRec.topLeft + NewVec2i(0, pigIconRec.height);
 		LCDBitmapDrawMode oldDrawMode = PdSetDrawMode(kDrawModeNXOR);
@@ -179,8 +214,8 @@ void GameUpdate()
 		
 		v2i textPos = NewVec2i(1, 1);
 		if (app->perfGraph.enabled) { textPos.y += app->perfGraph.mainRec.y + app->perfGraph.mainRec.height + 1; }
-		PdBindFont(&game->debugFont);
-		i32 stepY = game->debugFont.lineHeight + 1;
+		PdBindFont(&app->debugFont);
+		i32 stepY = app->debugFont.lineHeight + 1;
 		
 		// PdDrawTextPrint(textPos, "ProgramTime: %u (%u)", ProgramTime, input->realProgramTime);
 		// textPos.y += stepY;
@@ -203,7 +238,7 @@ void GameUpdate()
 		textPos.y += stepY;
 		PdDrawTextPrint(textPos, "small: %llu chars Height:%d %s", game->smallFont.numChars, game->smallFont.lineHeight, GetFontCapsStr(game->smallFont));
 		textPos.y += stepY;
-		PdDrawTextPrint(textPos, "debug: %llu chars Height:%d %s", game->debugFont.numChars, game->debugFont.lineHeight, GetFontCapsStr(game->debugFont));
+		PdDrawTextPrint(textPos, "debug: %llu chars Height:%d %s", app->debugFont.numChars, app->debugFont.lineHeight, GetFontCapsStr(app->debugFont));
 		textPos.y += stepY;
 		PdDrawTextPrint(textPos, "game: %llu chars Height:%d %s", game->gameFont.numChars, game->gameFont.lineHeight, GetFontCapsStr(game->gameFont));
 		textPos.y += stepY;
@@ -245,4 +280,19 @@ void GameUpdate()
 	}
 	
 	FreeScratchArena(scratch);
+}
+
+// +--------------------------------------------------------------+
+// |                           Register                           |
+// +--------------------------------------------------------------+
+void RegisterAppState_Game()
+{
+	game = (GameState_t*)RegisterAppState(
+		AppState_Game,
+		sizeof(GameState_t),
+		StartAppState_Game,
+		StopAppState_Game,
+		UpdateAppState_Game,
+		RenderAppState_Game
+	);
 }
