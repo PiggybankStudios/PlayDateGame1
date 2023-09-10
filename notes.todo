@@ -1,6 +1,5 @@
 
 # TODO List:
-	[ ] Split engine and game
 	[ ] Music manager
 	[ ] Btn Repeat Logic
 	[ ] Debug menu with infinite checkboxes (one menu item to pop it up)
@@ -273,6 +272,7 @@
 #
 
 # Completed TODO List Items
+[X] Split engine and game
 [X] AppState Full Cover
 [X] AppState_t
 [X] Sound Effects

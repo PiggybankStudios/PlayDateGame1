@@ -218,8 +218,8 @@ void RenderAppState_Game(bool isOnTop)
 	}
 	
 	v2i testFramePos = NewVec2i(
-		ScreenSize.width/2 - game->pieSheet.frameSize.width/2,
-		ScreenSize.height/2 - game->pieSheet.frameSize.height/2
+		ScreenSize.width/2 - game->testSheet.frameSize.width/2,
+		ScreenSize.height/2 - game->testSheet.frameSize.height/2
 	);
 	PdDrawSheetFrame(game->testSheet, game->testSheetFrame, testFramePos);
 	
