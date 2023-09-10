@@ -1,5 +1,6 @@
 
 # TODO List:
+	[ ] Split engine and game
 	[ ] Music manager
 	[ ] Btn Repeat Logic
 	[ ] Debug menu with infinite checkboxes (one menu item to pop it up)

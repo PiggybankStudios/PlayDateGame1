@@ -94,7 +94,8 @@ void StopAppState_Game(bool deinitialize, AppState_t nextState)
 {
 	if (deinitialize)
 	{
-		pd->system->removeMenuItem(game->backgroundMenuItem);
+		// pd->system->removeMenuItem(game->backgroundMenuItem);
+		pd->system->removeMenuItem(game->comboMenuItem);
 		//TODO: Free things!
 		ClearPointer(game);
 	}

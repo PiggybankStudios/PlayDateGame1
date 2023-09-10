@@ -10,20 +10,22 @@ set DemoBuild=0
 set AssertionsEnabled=1
 
 set LibDirectory=..\lib
-set SourceDirectory=..\code
+set EngineSourceDirectory=..\engine
+set GameSourceDirectory=..\game
 set DataDirectory=..\data
 set PlaydateSdkDirectory=C:\Users\robbitay\Documents\MyStuff\Programs\PlaydateSDK
 set SimCompilerExeName=gcc
 set ArmCompilerExeName=arm-none-eabi-gcc
 set PdcExeName=%PlaydateSdkDirectory%\bin\pdc
-set MainSourcePath=%SourceDirectory%\main.cpp
+set MainSourcePath=%EngineSourceDirectory%\pig_main.cpp
 set OutputObjName=%ProjectNameSafe%.obj
 set OutputLibName=pdex.lib
 set OutputDllName=pdex.dll
 set OutputPdbName=pdex.pdb
 set PdcOutputFolder=%ProjectNameSafe%.pdx
 set IncVersNumScriptPath=..\IncrementVersionNumber.py
-set VersionFilePath=%SourceDirectory%\version.h
+set EngineVersionFilePath=%EngineSourceDirectory%\pig_version.h
+set GameVersionFilePath=%GameSourceDirectory%\game_version.h
 set TimeString=%date:~-4,4%%date:~-10,2%%date:~-7,2%%time:~0,2%%time:~3,2%%time:~6,2%
 set OutputObjPdbName=%ProjectNameSafe%_obj_%TimeString%.pdb
 
@@ -70,14 +72,15 @@ rem /Zc:inline = Remove unreferenced functions or data if they're COMDAT or have
 rem /Zc:wchar_t = wchar_t is a native type, not a typedef (on by default)
 rem /fp:precise = "precise" floating-point model; results are predictable
 set CompilerFlags=%CompilerFlags% /errorReport:prompt /Zc:forScope /Zc:inline /Zc:wchar_t /fp:precise
-set IncludeDirectories=/I"%SourceDirectory%" /I"%LibDirectory%\include" /I"%PlaydateSdkDirectory%\C_API"
+set IncludeDirectories=/I"%EngineSourceDirectory%" /I"%GameSourceDirectory%" /I"%LibDirectory%\include" /I"%PlaydateSdkDirectory%\C_API"
 set LinkerFlags=/MANIFEST /NXCOMPAT /DYNAMICBASE /DEBUG /DLL /MACHINE:X64 /INCREMENTAL /SUBSYSTEM:CONSOLE /ERRORREPORT:PROMPT /NOLOGO /TLBID:1
 set LinkerFlags=%LinkerFlags% /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /ManifestFile:"%OutputDllName%.intermediate.manifest" /LTCGOUT:"%ProjectNameSafe%.iobj" /ILK:"%ProjectNameSafe%.ilk"
 set Libraries="kernel32.lib" "user32.lib" "gdi32.lib" "winspool.lib" "shell32.lib" "ole32.lib" "oleaut32.lib" "uuid.lib" "comdlg32.lib" "advapi32.lib"
 set PdcFlags=-k -sdkpath "%PlaydateSdkDirectory%"
 
 if "%PythonInstalled%"=="1" (
-	python %IncVersNumScriptPath% %VersionFilePath%
+	python %IncVersNumScriptPath% %EngineVersionFilePath%
+	python %IncVersNumScriptPath% %GameVersionFilePath%
 )
 
 del *.pdb > NUL 2> NUL
