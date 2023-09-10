@@ -52,7 +52,7 @@ void AppDebugPrint(u8 flags, const char* filePath, u32 lineNumber, const char* f
 // void GyLibOutputHandler(const char* filePath, u32 lineNumber, const char* funcName, DbgLevel_t level, bool newLine, const char* message)
 GYLIB_DEBUG_OUTPUT_HANDLER_DEF(GyLibOutputHandler)
 {
-	if (app != nullptr) { AppDebugOutput(DbgFlag_GyLib, filePath, lineNumber, funcName, level, newLine, message); }
+	if (pig != nullptr) { AppDebugOutput(DbgFlag_GyLib, filePath, lineNumber, funcName, level, newLine, message); }
 }
 // +==============================+
 // |      GyLibPrintHandler       |
@@ -63,7 +63,7 @@ GYLIB_DEBUG_PRINT_HANDLER_DEF(GyLibPrintHandler)
 	MemArena_t* scratch = GetScratchArena();
 	PrintInArenaVa(scratch, printedStr, printedLength, formatString);
 	//TODO: Add error checking!
-	if (app != nullptr) { GyLibOutputHandler(filePath, lineNumber, funcName, level, newLine, printedStr); }
+	if (pig != nullptr) { GyLibOutputHandler(filePath, lineNumber, funcName, level, newLine, printedStr); }
 	FreeScratchArena(scratch);
 }
 

@@ -1,19 +1,20 @@
 
 # TODO List:
+	[ ] Music manager
+	[ ] Btn Repeat Logic
 	[ ] Debug menu with infinite checkboxes (one menu item to pop it up)
 	[ ] Debug input? and Debug Commands
 	[ ] Debug Console (overlay?)
 	[ ] File System Wrappers
 	[ ] SaveGame system
-	[ ] Music manager
 	[ ] Support for pausing, stepping frame by frame, scaling time, etc.
 	[ ] Yes/No Dialog
 	[ ] Software Keyboard
 	[ ] Settings menu
-	[ ] Btn Repeat Logic
 	[ ] Togglable Mouse
 	[ ] Automatically ToUpper any strings being rendered in a font that only supports uppercase
 	[ ] AppState animated transitions?
+	[ ] Assertion actually freezes in emulator?
 
 # Notes during Setup
 	[ ] "https://help.play.date/hardware/get-started/"

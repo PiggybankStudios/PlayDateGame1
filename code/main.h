@@ -20,7 +20,7 @@ Date:   09\08\2023
 
 #define DEBUG_FONT_PATH "Resources/Fonts/pixel8"
 
-struct AppGlobalState_t
+struct PigEngineState_t
 {
 	bool initialized;
 	bool firstUpdateCalled;

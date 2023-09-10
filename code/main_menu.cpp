@@ -17,7 +17,7 @@ void StartAppState_MainMenu(bool initialize, AppState_t prevState, MyStr_t trans
 	{
 		for (u64 nIndex = 0; nIndex < ArrayCount(mmenu->randomNumbers); nIndex++)
 		{
-			mmenu->randomNumbers[nIndex] = GetRandU64(&app->random, 0, 1000);
+			mmenu->randomNumbers[nIndex] = GetRandU64(&pig->random, 0, 1000);
 		}
 		
 		mmenu->initialized = true;
@@ -66,17 +66,17 @@ void RenderAppState_MainMenu(bool isOnTop)
 	
 	//TODO: Implement me!
 	
-	if (app->debugEnabled)
+	if (pig->debugEnabled)
 	{
 		LCDBitmapDrawMode oldDrawMode = PdSetDrawMode(kDrawModeNXOR);
 		
 		v2i textPos = NewVec2i(1, 1);
-		if (app->perfGraph.enabled) { textPos.y += app->perfGraph.mainRec.y + app->perfGraph.mainRec.height + 1; }
-		PdBindFont(&app->debugFont);
-		i32 stepY = app->debugFont.lineHeight + 1;
+		if (pig->perfGraph.enabled) { textPos.y += pig->perfGraph.mainRec.y + pig->perfGraph.mainRec.height + 1; }
+		PdBindFont(&pig->debugFont);
+		i32 stepY = pig->debugFont.lineHeight + 1;
 		
 		u64 numSoundInstances = 0;
-		for (u64 iIndex = 0; iIndex < MAX_SOUND_INSTANCES; iIndex++) { if (app->soundPool.instances[iIndex].isPlaying) { numSoundInstances++; } }
+		for (u64 iIndex = 0; iIndex < MAX_SOUND_INSTANCES; iIndex++) { if (pig->soundPool.instances[iIndex].isPlaying) { numSoundInstances++; } }
 		PdDrawTextPrint(textPos, "%llu sound instance%s", numSoundInstances, Plural(numSoundInstances, "s"));
 		textPos.y += stepY;
 		

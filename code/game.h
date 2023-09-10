@@ -23,6 +23,8 @@ struct GameState_t
 	
 	PDMenuItem* backgroundMenuItem;
 	bool backgroundEnabled;
+	PDMenuItem* comboMenuItem;
+	i32 comboValue;
 	
 	Font_t mainFont;
 	Font_t smallFont;

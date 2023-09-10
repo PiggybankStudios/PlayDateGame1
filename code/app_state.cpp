@@ -8,72 +8,72 @@ Description:
 
 AppState_t GetCurrentAppState()
 {
-	return (app->appStates.stackSize > 0) ? app->appStates.stack[app->appStates.stackSize-1] : AppState_None;
+	return (pig->appStates.stackSize > 0) ? pig->appStates.stack[pig->appStates.stackSize-1] : AppState_None;
 }
 bool IsCurrentAppState()
 {
-	Assert(app->appStates.contextAppState != AppState_None);
-	return (app->appStates.contextAppState == GetCurrentAppState());
+	Assert(pig->appStates.contextAppState != AppState_None);
+	return (pig->appStates.contextAppState == GetCurrentAppState());
 }
 bool IsAppStateInitialized(AppState_t appState)
 {
-	return app->appStates.infos[appState].initialized;
+	return pig->appStates.infos[appState].initialized;
 }
 bool IsAppStateActive(AppState_t appState)
 {
-	return app->appStates.infos[appState].isActive;
+	return pig->appStates.infos[appState].isActive;
 }
 
 void StartAppState(AppState_t appState, bool initialize, AppState_t prevState, MyStr_t transitionStr)
 {
-	AppStateInfo_t* info = &app->appStates.infos[appState];
+	AppStateInfo_t* info = &pig->appStates.infos[appState];
 	NotNull(info->Start);
 	Assert(initialize == !info->initialized);
-	app->appStates.contextAppState = appState;
+	pig->appStates.contextAppState = appState;
 	PrintLine_D("%s AppState_%s", (initialize ? "Initializing" : "Starting"), GetAppStateStr(appState));
 	if (info->Start) { info->Start(initialize, prevState, transitionStr); }
 	if (initialize) { info->initialized = true; }
 	info->isActive = true;
-	app->appStates.contextAppState = AppState_None;
+	pig->appStates.contextAppState = AppState_None;
 }
 
 void StopAppState(AppState_t appState, bool deinitialize, AppState_t nextState)
 {
-	AppStateInfo_t* info = &app->appStates.infos[appState];
+	AppStateInfo_t* info = &pig->appStates.infos[appState];
 	NotNull(info->Stop);
 	Assert(info->initialized);
-	app->appStates.contextAppState = appState;
+	pig->appStates.contextAppState = appState;
 	PrintLine_D("%s AppState_%s", (deinitialize ? "Deinitializing" : "Stopping"), GetAppStateStr(appState));
 	if (info->Stop) { info->Stop(deinitialize, nextState); }
 	if (deinitialize) { info->initialized = false; }
 	info->isActive = false;
-	app->appStates.contextAppState = AppState_None;
+	pig->appStates.contextAppState = AppState_None;
 }
 
 void UpdateAppState(AppState_t appState)
 {
-	AppStateInfo_t* info = &app->appStates.infos[appState];
+	AppStateInfo_t* info = &pig->appStates.infos[appState];
 	NotNull(info->Update);
 	Assert(info->initialized);
-	app->appStates.contextAppState = appState;
+	pig->appStates.contextAppState = appState;
 	if (info->Update) { info->Update(); }
-	app->appStates.contextAppState = AppState_None;
+	pig->appStates.contextAppState = AppState_None;
 }
 
 void RenderAppState(AppState_t appState, bool isOnTop)
 {
-	AppStateInfo_t* info = &app->appStates.infos[appState];
+	AppStateInfo_t* info = &pig->appStates.infos[appState];
 	NotNull(info->Render);
 	Assert(info->initialized);
-	app->appStates.contextAppState = appState;
+	pig->appStates.contextAppState = appState;
 	if (info->Render) { info->Render(isOnTop); }
-	app->appStates.contextAppState = AppState_None;
+	pig->appStates.contextAppState = AppState_None;
 }
 
 bool IsFullAppState(AppState_t appState)
 {
 	bool result = true;
-	AppStateInfo_t* info = &app->appStates.infos[appState];
+	AppStateInfo_t* info = &pig->appStates.infos[appState];
 	Assert(info->initialized);
 	if (info->IsFull != nullptr) { result = info->IsFull(); }
 	return result;
@@ -81,53 +81,53 @@ bool IsFullAppState(AppState_t appState)
 
 void StartFirstAppState()
 {
-	app->appStates.stack[0] = FIRST_APP_STATE;
-	app->appStates.stackSize = 1;
+	pig->appStates.stack[0] = FIRST_APP_STATE;
+	pig->appStates.stackSize = 1;
 	StartAppState(FIRST_APP_STATE, true, AppState_None, MyStr_Empty);
 }
 
 void UpdateAndRenderAppStateStack()
 {
-	for (u64 cIndex = 0; cIndex < app->appStates.numChanges; cIndex++)
+	for (u64 cIndex = 0; cIndex < pig->appStates.numChanges; cIndex++)
 	{
-		AppStateChange_t* change = &app->appStates.changes[cIndex];
+		AppStateChange_t* change = &pig->appStates.changes[cIndex];
 		switch (change->type)
 		{
 			case AppStateChangeType_Push:
 			{
-				Assert(app->appStates.stackSize < ArrayCount(app->appStates.stack));
-				AppStateInfo_t* requestedInfo = &app->appStates.infos[change->requestedState];
+				Assert(pig->appStates.stackSize < ArrayCount(pig->appStates.stack));
+				AppStateInfo_t* requestedInfo = &pig->appStates.infos[change->requestedState];
 				AppState_t prevState = GetCurrentAppState();
 				if (prevState != AppState_None) { StopAppState(prevState, false, change->requestedState); }
 				StartAppState(change->requestedState, !requestedInfo->initialized, prevState, change->transitionStr);
-				app->appStates.stack[app->appStates.stackSize] = change->requestedState;
-				app->appStates.stackSize++;
+				pig->appStates.stack[pig->appStates.stackSize] = change->requestedState;
+				pig->appStates.stackSize++;
 			} break;
 			
 			case AppStateChangeType_Pop:
 			{
-				Assert(app->appStates.stackSize <= ArrayCount(app->appStates.stack));
+				Assert(pig->appStates.stackSize <= ArrayCount(pig->appStates.stack));
 				AppState_t prevState = GetCurrentAppState();
 				Assert(prevState == change->requestingState);
-				AppState_t newState = (app->appStates.stackSize > 1 ? app->appStates.stack[app->appStates.stackSize-2] : AppState_None);
+				AppState_t newState = (pig->appStates.stackSize > 1 ? pig->appStates.stack[pig->appStates.stackSize-2] : AppState_None);
 				StopAppState(prevState, !change->stayInitialized, newState);
-				app->appStates.stackSize--;
+				pig->appStates.stackSize--;
 				if (newState != AppState_None) { StartAppState(newState, false, prevState, change->transitionStr); }
 			} break;
 			
 			case AppStateChangeType_Change:
 			{
-				Assert(app->appStates.stackSize <= ArrayCount(app->appStates.stack));
-				AppStateInfo_t* requestedInfo = &app->appStates.infos[change->requestedState];
+				Assert(pig->appStates.stackSize <= ArrayCount(pig->appStates.stack));
+				AppStateInfo_t* requestedInfo = &pig->appStates.infos[change->requestedState];
 				AppState_t prevState = GetCurrentAppState();
 				if (prevState != AppState_None)
 				{
 					StopAppState(prevState, !change->stayInitialized, change->requestedState);
-					app->appStates.stackSize--;
+					pig->appStates.stackSize--;
 				}
 				StartAppState(change->requestedState, !requestedInfo->initialized, prevState, change->transitionStr);
-				app->appStates.stack[app->appStates.stackSize] = change->requestedState;
-				app->appStates.stackSize++;
+				pig->appStates.stack[pig->appStates.stackSize] = change->requestedState;
+				pig->appStates.stackSize++;
 			} break;
 			
 			default: Assert(false); break;
@@ -137,26 +137,26 @@ void UpdateAndRenderAppStateStack()
 			FreeString(mainHeap, &change->transitionStr);
 		}
 	}
-	app->appStates.numChanges = 0;
+	pig->appStates.numChanges = 0;
 	
-	if (app->appStates.stackSize > 0)
+	if (pig->appStates.stackSize > 0)
 	{
-		UpdateAppState(app->appStates.stack[app->appStates.stackSize-1]);
+		UpdateAppState(pig->appStates.stack[pig->appStates.stackSize-1]);
 	}
 	
 	u64 firstFullAppStateIndex = 0;
-	for (u64 sIndex = app->appStates.stackSize; sIndex > 0; sIndex--)
+	for (u64 sIndex = pig->appStates.stackSize; sIndex > 0; sIndex--)
 	{
-		if (IsFullAppState(app->appStates.stack[sIndex-1]))
+		if (IsFullAppState(pig->appStates.stack[sIndex-1]))
 		{
 			firstFullAppStateIndex = sIndex-1;
 			break;
 		}
 	}
 	
-	for (u64 sIndex = firstFullAppStateIndex; sIndex < app->appStates.stackSize; sIndex++)
+	for (u64 sIndex = firstFullAppStateIndex; sIndex < pig->appStates.stackSize; sIndex++)
 	{
-		RenderAppState(app->appStates.stack[sIndex], (sIndex == app->appStates.stackSize-1));
+		RenderAppState(pig->appStates.stack[sIndex], (sIndex == pig->appStates.stackSize-1));
 	}
 }
 
@@ -167,7 +167,7 @@ void* RegisterAppState(AppState_t state, u64 dataSize, AppStateStart_f* StartFun
 {
 	Assert(state < AppState_NumStates);
 	NotNull4(StartFunc, StopFunc, UpdateFunc, RenderFunc);
-	AppStateInfo_t* info = &app->appStates.infos[state];
+	AppStateInfo_t* info = &pig->appStates.infos[state];
 	Assert(info->dataPntr == nullptr);
 	ClearPointer(info);
 	info->dataSize = dataSize;
@@ -184,44 +184,44 @@ void* RegisterAppState(AppState_t state, u64 dataSize, AppStateStart_f* StartFun
 
 void PushAppState(AppState_t newAppState, MyStr_t transitionStr = MyStr_Empty_Const)
 {
-	Assert(app->appStates.numChanges < MAX_NUM_APP_STATE_CHANGE_REQUESTS);
-	Assert(app->appStates.contextAppState != AppState_None);
+	Assert(pig->appStates.numChanges < MAX_NUM_APP_STATE_CHANGE_REQUESTS);
+	Assert(pig->appStates.contextAppState != AppState_None);
 	Assert(newAppState != AppState_None);
 	Assert(!IsAppStateActive(newAppState));
-	AppStateChange_t* change = &app->appStates.changes[app->appStates.numChanges];
+	AppStateChange_t* change = &pig->appStates.changes[pig->appStates.numChanges];
 	ClearPointer(change);
 	change->type = AppStateChangeType_Push;
-	change->requestingState = app->appStates.contextAppState;
+	change->requestingState = pig->appStates.contextAppState;
 	change->requestedState = newAppState;
 	if (!IsEmptyStr(transitionStr)) { change->transitionStr = AllocString(mainHeap, &transitionStr); }
-	app->appStates.numChanges++;
+	pig->appStates.numChanges++;
 }
 
 void PopAppState(MyStr_t transitionStr = MyStr_Empty, bool stayInitialized = false)
 {
-	Assert(app->appStates.numChanges < MAX_NUM_APP_STATE_CHANGE_REQUESTS);
-	Assert(app->appStates.contextAppState != AppState_None);
-	AppStateChange_t* change = &app->appStates.changes[app->appStates.numChanges];
+	Assert(pig->appStates.numChanges < MAX_NUM_APP_STATE_CHANGE_REQUESTS);
+	Assert(pig->appStates.contextAppState != AppState_None);
+	AppStateChange_t* change = &pig->appStates.changes[pig->appStates.numChanges];
 	ClearPointer(change);
 	change->type = AppStateChangeType_Pop;
-	change->requestingState = app->appStates.contextAppState;
+	change->requestingState = pig->appStates.contextAppState;
 	if (!IsEmptyStr(transitionStr)) { change->transitionStr = AllocString(mainHeap, &transitionStr); }
 	change->stayInitialized = stayInitialized;
-	app->appStates.numChanges++;
+	pig->appStates.numChanges++;
 }
 
 void ChangeAppState(AppState_t newAppState, MyStr_t transitionStr = MyStr_Empty, bool stayInitialized = false)
 {
-	Assert(app->appStates.numChanges < MAX_NUM_APP_STATE_CHANGE_REQUESTS);
-	Assert(app->appStates.contextAppState != AppState_None);
+	Assert(pig->appStates.numChanges < MAX_NUM_APP_STATE_CHANGE_REQUESTS);
+	Assert(pig->appStates.contextAppState != AppState_None);
 	Assert(newAppState != AppState_None);
 	Assert(!IsAppStateActive(newAppState));
-	AppStateChange_t* change = &app->appStates.changes[app->appStates.numChanges];
+	AppStateChange_t* change = &pig->appStates.changes[pig->appStates.numChanges];
 	ClearPointer(change);
 	change->type = AppStateChangeType_Change;
-	change->requestingState = app->appStates.contextAppState;
+	change->requestingState = pig->appStates.contextAppState;
 	change->requestedState = newAppState;
 	if (!IsEmptyStr(transitionStr)) { change->transitionStr = AllocString(mainHeap, &transitionStr); }
 	change->stayInitialized = stayInitialized;
-	app->appStates.numChanges++;
+	pig->appStates.numChanges++;
 }

@@ -21,6 +21,24 @@ void BackgroundToggledCallback(void* userData)
 	}
 }
 
+const char* ComboOptions[] =
+{
+	"Option1",
+	"Option2",
+	"Option3",
+	"Option4",
+	"Test",
+};
+void ComboMenuItemCallback(void* userData)
+{
+	i32 newValue = pd->system->getMenuItemValue(game->comboMenuItem);
+	if (game->comboValue != newValue)
+	{
+		game->comboValue = newValue;
+		PrintLine_I("Combo %d", game->comboValue);
+	}
+}
+
 // +--------------------------------------------------------------+
 // |                            Start                             |
 // +--------------------------------------------------------------+
@@ -28,10 +46,15 @@ void StartAppState_Game(bool initialize, AppState_t prevState, MyStr_t transitio
 {
 	if (initialize)
 	{
-		game->backgroundEnabled = true;
-		game->backgroundMenuItem = pd->system->addCheckmarkMenuItem("Bg", 1, BackgroundToggledCallback, nullptr);
-		NotNull(game->backgroundMenuItem);
-		pd->system->setMenuItemValue(game->backgroundMenuItem, game->backgroundEnabled ? 1 : 0);
+		// game->backgroundEnabled = true;
+		// game->backgroundMenuItem = pd->system->addCheckmarkMenuItem("Bg", 1, BackgroundToggledCallback, nullptr);
+		// NotNull(game->backgroundMenuItem);
+		// pd->system->setMenuItemValue(game->backgroundMenuItem, game->backgroundEnabled ? 1 : 0);
+		
+		game->comboValue = 1;
+		game->comboMenuItem = pd->system->addOptionsMenuItem("Combo", ComboOptions, ArrayCount(ComboOptions), ComboMenuItemCallback, nullptr);
+		NotNull(game->comboMenuItem);
+		pd->system->setMenuItemValue(game->comboMenuItem, game->comboValue);
 		
 		game->mainFont = LoadFont(NewStr(MAIN_FONT_PATH));
 		Assert(game->mainFont.isValid);
@@ -208,14 +231,14 @@ void RenderAppState_Game(bool isOnTop)
 		PdDrawSheetFrame(game->pieSheet, pieFrame, NewReci(ScreenSize.width - pieSize.width, 0, pieSize));
 	}
 	
-	if (app->debugEnabled)
+	if (pig->debugEnabled)
 	{
 		LCDBitmapDrawMode oldDrawMode = PdSetDrawMode(kDrawModeNXOR);
 		
 		v2i textPos = NewVec2i(1, 1);
-		if (app->perfGraph.enabled) { textPos.y += app->perfGraph.mainRec.y + app->perfGraph.mainRec.height + 1; }
-		PdBindFont(&app->debugFont);
-		i32 stepY = app->debugFont.lineHeight + 1;
+		if (pig->perfGraph.enabled) { textPos.y += pig->perfGraph.mainRec.y + pig->perfGraph.mainRec.height + 1; }
+		PdBindFont(&pig->debugFont);
+		i32 stepY = pig->debugFont.lineHeight + 1;
 		
 		// PdDrawTextPrint(textPos, "ProgramTime: %u (%u)", ProgramTime, input->realProgramTime);
 		// textPos.y += stepY;
@@ -230,7 +253,7 @@ void RenderAppState_Game(bool isOnTop)
 		// textPos.y += stepY;
 		
 		u64 numSoundInstances = 0;
-		for (u64 iIndex = 0; iIndex < MAX_SOUND_INSTANCES; iIndex++) { if (app->soundPool.instances[iIndex].isPlaying) { numSoundInstances++; } }
+		for (u64 iIndex = 0; iIndex < MAX_SOUND_INSTANCES; iIndex++) { if (pig->soundPool.instances[iIndex].isPlaying) { numSoundInstances++; } }
 		PdDrawTextPrint(textPos, "%llu sound instance%s", numSoundInstances, Plural(numSoundInstances, "s"));
 		textPos.y += stepY;
 		
@@ -238,7 +261,7 @@ void RenderAppState_Game(bool isOnTop)
 		textPos.y += stepY;
 		PdDrawTextPrint(textPos, "small: %llu chars Height:%d %s", game->smallFont.numChars, game->smallFont.lineHeight, GetFontCapsStr(game->smallFont));
 		textPos.y += stepY;
-		PdDrawTextPrint(textPos, "debug: %llu chars Height:%d %s", app->debugFont.numChars, app->debugFont.lineHeight, GetFontCapsStr(app->debugFont));
+		PdDrawTextPrint(textPos, "debug: %llu chars Height:%d %s", pig->debugFont.numChars, pig->debugFont.lineHeight, GetFontCapsStr(pig->debugFont));
 		textPos.y += stepY;
 		PdDrawTextPrint(textPos, "game: %llu chars Height:%d %s", game->gameFont.numChars, game->gameFont.lineHeight, GetFontCapsStr(game->gameFont));
 		textPos.y += stepY;

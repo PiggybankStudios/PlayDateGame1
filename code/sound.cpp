@@ -120,6 +120,6 @@ SoundInstance_t* PlaySound(SoundPool_t* pool, Sound_t* source, int repeatCount =
 }
 SoundInstance_t* PlaySound(Sound_t* source, int repeatCount = 1, r32 rate = 1.0f)
 {
-	NotNull(app);
-	return PlaySound(&app->soundPool, source, repeatCount, rate);
+	NotNull(pig);
+	return PlaySound(&pig->soundPool, source, repeatCount, rate);
 }
