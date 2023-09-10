@@ -13,10 +13,6 @@ Date:   09\08\2023
 
 #define GAME_RETURN_TO_MENU_HOLD_B_TIME 1000
 
-// #define TEXT_WIDTH 112
-// #define TEXT_HEIGHT 16
-// #define DISPLAY_TEXT "Taylor Robbins!"
-
 struct GameState_t
 {
 	bool initialized;

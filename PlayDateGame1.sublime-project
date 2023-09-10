@@ -9,7 +9,16 @@
 				"lib",
 				".vs",
 				"Debug",
+				"engine",
 			],
+		},
+		{
+			"name": "PigEngine",
+			"path": "engine/platform/playdate",
+		},
+		{
+			"name": "GyLib",
+			"path": "lib/include/gylib",
 		},
 		{
 			"path": "build",
@@ -27,10 +36,6 @@
 				"*.manifest",
 				"preprocessed_output.txt",
 			],
-		},
-		{
-			"name": "GyLib",
-			"path": "lib/include/gylib",
 		},
 		{
 			"path": "C:\\Users\\robbitay\\Documents\\MyStuff\\Programs\\PlaydateSDK",

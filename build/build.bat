@@ -10,7 +10,7 @@ set DemoBuild=0
 set AssertionsEnabled=1
 
 set LibDirectory=..\lib
-set EngineSourceDirectory=..\engine
+set EngineSourceDirectory=..\engine\platform\playdate
 set GameSourceDirectory=..\game
 set DataDirectory=..\data
 set PlaydateSdkDirectory=C:\Users\robbitay\Documents\MyStuff\Programs\PlaydateSDK
