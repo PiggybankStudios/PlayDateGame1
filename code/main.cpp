@@ -158,6 +158,12 @@ void HandleSystemEvent(PDSystemEvent event, uint32_t arg)
 			Assert(app->debugFont.isValid);
 			
 			WriteLine_N("Initializing...");
+			CreateRandomSeries(&app->random);
+			#if 1
+			SeedRandomSeriesU64(&app->random, pd->system->getSecondsSinceEpoch(nullptr));
+			#else
+			SeedRandomSeriesU64(&app->random, 1);
+			#endif
 			input = &app->input;
 			InitializeAppInput();
 			InitSoundPool(&app->soundPool);

@@ -31,7 +31,7 @@ const char* GetAppStateStr(AppState_t enumValue)
 	}
 }
 
-#define APP_STATE_START_DEFINITION(functionName) void functionName(bool initialize, AppState_t prevState)
+#define APP_STATE_START_DEFINITION(functionName) void functionName(bool initialize, AppState_t prevState, MyStr_t infoStr)
 typedef APP_STATE_START_DEFINITION(AppStateStart_f);
 #define APP_STATE_STOP_DEFINITION(functionName) void functionName(bool deinitialize, AppState_t nextState)
 typedef APP_STATE_STOP_DEFINITION(AppStateStop_f);
@@ -39,6 +39,8 @@ typedef APP_STATE_STOP_DEFINITION(AppStateStop_f);
 typedef APP_STATE_UPDATE_DEFINITION(AppStateUpdate_f);
 #define APP_STATE_RENDER_DEFINITION(functionName) void functionName(bool isOnTop)
 typedef APP_STATE_RENDER_DEFINITION(AppStateRender_f);
+#define APP_STATE_IS_FULL_DEFINITION(functionName) bool functionName()
+typedef APP_STATE_IS_FULL_DEFINITION(AppStateIsFull_f);
 
 struct AppStateInfo_t
 {
@@ -49,6 +51,7 @@ struct AppStateInfo_t
 	AppStateStop_f*   Stop;
 	AppStateUpdate_f* Update;
 	AppStateRender_f* Render;
+	AppStateIsFull_f* IsFull;
 	
 	bool initialized;
 	bool isActive;
@@ -79,6 +82,8 @@ struct AppStateChange_t
 	AppStateChangeType_t type;
 	AppState_t requestingState;
 	AppState_t requestedState;
+	bool stayInitialized;
+	MyStr_t transitionStr;
 };
 
 struct AppStateStack_t

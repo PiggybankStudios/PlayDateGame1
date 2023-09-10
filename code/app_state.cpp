@@ -24,14 +24,14 @@ bool IsAppStateActive(AppState_t appState)
 	return app->appStates.infos[appState].isActive;
 }
 
-void StartAppState(AppState_t appState, bool initialize, AppState_t prevState)
+void StartAppState(AppState_t appState, bool initialize, AppState_t prevState, MyStr_t transitionStr)
 {
 	AppStateInfo_t* info = &app->appStates.infos[appState];
 	NotNull(info->Start);
 	Assert(initialize == !info->initialized);
 	app->appStates.contextAppState = appState;
 	PrintLine_D("%s AppState_%s", (initialize ? "Initializing" : "Starting"), GetAppStateStr(appState));
-	if (info->Start) { info->Start(initialize, prevState); }
+	if (info->Start) { info->Start(initialize, prevState, transitionStr); }
 	if (initialize) { info->initialized = true; }
 	info->isActive = true;
 	app->appStates.contextAppState = AppState_None;
@@ -70,11 +70,20 @@ void RenderAppState(AppState_t appState, bool isOnTop)
 	app->appStates.contextAppState = AppState_None;
 }
 
+bool IsFullAppState(AppState_t appState)
+{
+	bool result = true;
+	AppStateInfo_t* info = &app->appStates.infos[appState];
+	Assert(info->initialized);
+	if (info->IsFull != nullptr) { result = info->IsFull(); }
+	return result;
+}
+
 void StartFirstAppState()
 {
 	app->appStates.stack[0] = FIRST_APP_STATE;
 	app->appStates.stackSize = 1;
-	StartAppState(FIRST_APP_STATE, true, AppState_None);
+	StartAppState(FIRST_APP_STATE, true, AppState_None, MyStr_Empty);
 }
 
 void UpdateAndRenderAppStateStack()
@@ -90,7 +99,7 @@ void UpdateAndRenderAppStateStack()
 				AppStateInfo_t* requestedInfo = &app->appStates.infos[change->requestedState];
 				AppState_t prevState = GetCurrentAppState();
 				if (prevState != AppState_None) { StopAppState(prevState, false, change->requestedState); }
-				StartAppState(change->requestedState, !requestedInfo->initialized, prevState);
+				StartAppState(change->requestedState, !requestedInfo->initialized, prevState, change->transitionStr);
 				app->appStates.stack[app->appStates.stackSize] = change->requestedState;
 				app->appStates.stackSize++;
 			} break;
@@ -101,9 +110,9 @@ void UpdateAndRenderAppStateStack()
 				AppState_t prevState = GetCurrentAppState();
 				Assert(prevState == change->requestingState);
 				AppState_t newState = (app->appStates.stackSize > 1 ? app->appStates.stack[app->appStates.stackSize-2] : AppState_None);
-				StopAppState(prevState, true, newState);
+				StopAppState(prevState, !change->stayInitialized, newState);
 				app->appStates.stackSize--;
-				if (newState != AppState_None) { StartAppState(newState, false, prevState); }
+				if (newState != AppState_None) { StartAppState(newState, false, prevState, change->transitionStr); }
 			} break;
 			
 			case AppStateChangeType_Change:
@@ -113,15 +122,19 @@ void UpdateAndRenderAppStateStack()
 				AppState_t prevState = GetCurrentAppState();
 				if (prevState != AppState_None)
 				{
-					StopAppState(prevState, true, change->requestedState);
+					StopAppState(prevState, !change->stayInitialized, change->requestedState);
 					app->appStates.stackSize--;
 				}
-				StartAppState(change->requestedState, !requestedInfo->initialized, prevState);
+				StartAppState(change->requestedState, !requestedInfo->initialized, prevState, change->transitionStr);
 				app->appStates.stack[app->appStates.stackSize] = change->requestedState;
 				app->appStates.stackSize++;
 			} break;
 			
 			default: Assert(false); break;
+		}
+		if (!IsEmptyStr(change->transitionStr))
+		{
+			FreeString(mainHeap, &change->transitionStr);
 		}
 	}
 	app->appStates.numChanges = 0;
@@ -131,7 +144,17 @@ void UpdateAndRenderAppStateStack()
 		UpdateAppState(app->appStates.stack[app->appStates.stackSize-1]);
 	}
 	
-	for (u64 sIndex = 0; sIndex < app->appStates.stackSize; sIndex++)
+	u64 firstFullAppStateIndex = 0;
+	for (u64 sIndex = app->appStates.stackSize; sIndex > 0; sIndex--)
+	{
+		if (IsFullAppState(app->appStates.stack[sIndex-1]))
+		{
+			firstFullAppStateIndex = sIndex-1;
+			break;
+		}
+	}
+	
+	for (u64 sIndex = firstFullAppStateIndex; sIndex < app->appStates.stackSize; sIndex++)
 	{
 		RenderAppState(app->appStates.stack[sIndex], (sIndex == app->appStates.stackSize-1));
 	}
@@ -140,7 +163,7 @@ void UpdateAndRenderAppStateStack()
 // +--------------------------------------------------------------+
 // |                             API                              |
 // +--------------------------------------------------------------+
-void* RegisterAppState(AppState_t state, u64 dataSize, AppStateStart_f* StartFunc, AppStateStop_f* StopFunc, AppStateUpdate_f* UpdateFunc, AppStateRender_f* RenderFunc)
+void* RegisterAppState(AppState_t state, u64 dataSize, AppStateStart_f* StartFunc, AppStateStop_f* StopFunc, AppStateUpdate_f* UpdateFunc, AppStateRender_f* RenderFunc, AppStateIsFull_f* IsFullFunc = nullptr)
 {
 	Assert(state < AppState_NumStates);
 	NotNull4(StartFunc, StopFunc, UpdateFunc, RenderFunc);
@@ -155,11 +178,11 @@ void* RegisterAppState(AppState_t state, u64 dataSize, AppStateStart_f* StartFun
 	info->Stop = StopFunc;
 	info->Update = UpdateFunc;
 	info->Render = RenderFunc;
-	PrintLine_D("Registered %s %p %p %p %p", GetAppStateStr(state), StartFunc, StopFunc, UpdateFunc, RenderFunc);
+	info->IsFull = IsFullFunc;
 	return info->dataPntr;
 }
 
-void PushAppState(AppState_t newAppState)
+void PushAppState(AppState_t newAppState, MyStr_t transitionStr = MyStr_Empty_Const)
 {
 	Assert(app->appStates.numChanges < MAX_NUM_APP_STATE_CHANGE_REQUESTS);
 	Assert(app->appStates.contextAppState != AppState_None);
@@ -170,10 +193,11 @@ void PushAppState(AppState_t newAppState)
 	change->type = AppStateChangeType_Push;
 	change->requestingState = app->appStates.contextAppState;
 	change->requestedState = newAppState;
+	if (!IsEmptyStr(transitionStr)) { change->transitionStr = AllocString(mainHeap, &transitionStr); }
 	app->appStates.numChanges++;
 }
 
-void PopAppState()
+void PopAppState(MyStr_t transitionStr = MyStr_Empty, bool stayInitialized = false)
 {
 	Assert(app->appStates.numChanges < MAX_NUM_APP_STATE_CHANGE_REQUESTS);
 	Assert(app->appStates.contextAppState != AppState_None);
@@ -181,10 +205,12 @@ void PopAppState()
 	ClearPointer(change);
 	change->type = AppStateChangeType_Pop;
 	change->requestingState = app->appStates.contextAppState;
+	if (!IsEmptyStr(transitionStr)) { change->transitionStr = AllocString(mainHeap, &transitionStr); }
+	change->stayInitialized = stayInitialized;
 	app->appStates.numChanges++;
 }
 
-void ChangeAppState(AppState_t newAppState)
+void ChangeAppState(AppState_t newAppState, MyStr_t transitionStr = MyStr_Empty, bool stayInitialized = false)
 {
 	Assert(app->appStates.numChanges < MAX_NUM_APP_STATE_CHANGE_REQUESTS);
 	Assert(app->appStates.contextAppState != AppState_None);
@@ -195,5 +221,7 @@ void ChangeAppState(AppState_t newAppState)
 	change->type = AppStateChangeType_Change;
 	change->requestingState = app->appStates.contextAppState;
 	change->requestedState = newAppState;
+	if (!IsEmptyStr(transitionStr)) { change->transitionStr = AllocString(mainHeap, &transitionStr); }
+	change->stayInitialized = stayInitialized;
 	app->appStates.numChanges++;
 }

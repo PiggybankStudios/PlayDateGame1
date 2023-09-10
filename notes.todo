@@ -1,6 +1,5 @@
 
 # TODO List:
-	[ ] AppState_t
 	[ ] Debug menu with infinite checkboxes (one menu item to pop it up)
 	[ ] Debug input? and Debug Commands
 	[ ] Debug Console (overlay?)
@@ -13,6 +12,8 @@
 	[ ] Settings menu
 	[ ] Btn Repeat Logic
 	[ ] Togglable Mouse
+	[ ] Automatically ToUpper any strings being rendered in a font that only supports uppercase
+	[ ] AppState animated transitions?
 
 # Notes during Setup
 	[ ] "https://help.play.date/hardware/get-started/"
@@ -270,6 +271,8 @@
 #
 
 # Completed TODO List Items
+[X] AppState Full Cover
+[X] AppState_t
 [X] Sound Effects
 [X] FPS graph?
 [X] Font_t structure

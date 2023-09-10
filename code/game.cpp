@@ -24,7 +24,7 @@ void BackgroundToggledCallback(void* userData)
 // +--------------------------------------------------------------+
 // |                            Start                             |
 // +--------------------------------------------------------------+
-void StartAppState_Game(bool initialize, AppState_t prevState)
+void StartAppState_Game(bool initialize, AppState_t prevState, MyStr_t transitionStr)
 {
 	if (initialize)
 	{

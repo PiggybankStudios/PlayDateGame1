@@ -11,10 +11,14 @@ MainMenuState_t* mmenu = nullptr;
 // +--------------------------------------------------------------+
 // |                            Start                             |
 // +--------------------------------------------------------------+
-void StartAppState_MainMenu(bool initialize, AppState_t prevState)
+void StartAppState_MainMenu(bool initialize, AppState_t prevState, MyStr_t transitionStr)
 {
 	if (initialize)
 	{
+		for (u64 nIndex = 0; nIndex < ArrayCount(mmenu->randomNumbers); nIndex++)
+		{
+			mmenu->randomNumbers[nIndex] = GetRandU64(&app->random, 0, 1000);
+		}
 		
 		mmenu->initialized = true;
 	}
@@ -75,6 +79,12 @@ void RenderAppState_MainMenu(bool isOnTop)
 		for (u64 iIndex = 0; iIndex < MAX_SOUND_INSTANCES; iIndex++) { if (app->soundPool.instances[iIndex].isPlaying) { numSoundInstances++; } }
 		PdDrawTextPrint(textPos, "%llu sound instance%s", numSoundInstances, Plural(numSoundInstances, "s"));
 		textPos.y += stepY;
+		
+		for (u64 nIndex = 0; nIndex < ArrayCount(mmenu->randomNumbers); nIndex++)
+		{
+			PdDrawTextPrint(textPos, "%llu", mmenu->randomNumbers[nIndex]);
+			textPos.y += stepY;
+		}
 		
 		PdSetDrawMode(oldDrawMode);
 	}

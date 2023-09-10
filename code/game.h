@@ -9,8 +9,9 @@ Date:   09\08\2023
 
 #define MAIN_FONT_PATH  "/System/Fonts/Asheville-Sans-14-Bold.pft"
 #define SMALL_FONT_PATH "/System/Fonts/Roobert-10-Bold.pft"
-#define DEBUG_FONT_PATH "Resources/Fonts/pixel8"
 #define GAME_FONT_PATH  "Resources/Fonts/MVP"
+
+#define GAME_RETURN_TO_MENU_HOLD_B_TIME 1000
 
 // #define TEXT_WIDTH 112
 // #define TEXT_HEIGHT 16
@@ -25,7 +26,6 @@ struct GameState_t
 	
 	Font_t mainFont;
 	Font_t smallFont;
-	Font_t debugFont;
 	Font_t gameFont;
 	
 	SpriteSheet_t testSheet;
@@ -45,6 +45,8 @@ struct GameState_t
 	v2 pigOldVel;
 	
 	bool isInverted;
+	
+	r32 holdBTime;
 };
 
 #endif //  _GAME_H

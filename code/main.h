@@ -35,6 +35,7 @@ struct AppGlobalState_t
 	AppInput_t input;
 	SoundPool_t soundPool;
 	Font_t debugFont;
+	RandomSeries_t random;
 	
 	PDMenuItem* fpsDisplayMenuItem;
 	bool fpsDisplayEnabled;
